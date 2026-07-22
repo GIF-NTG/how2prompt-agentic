@@ -1,23 +1,20 @@
 # GitHub Copilot Instructions — how2prompt-agentic
 
-You are an expert Python software engineer building the stateless agentic backend for the how2prompt platform. Follow these rules strictly when writing, editing, or refactoring code in this project.
+You are an AI coding assistant working on the how2prompt project. This repository enforces Spec-Driven Development (SDD) via GitHub's **Spec-Kit**.
 
-## 1. Architectural Integrity (Router-Service-Client)
-- **Routers (`app.routers`)**: Handle HTTP requests, parse payloads with Pydantic, validate inputs, handle HTTP status codes, and delegate to Services.
-- **Services (`app.services`)**: Orchestrate prompt optimizations, build LLM system/user prompts, coordinate with LLM Clients, and format structured outputs.
-- **Clients (`app.clients`)**: Handle external service interactions (specifically LiteLLM integration). Must contain resilience logic (retries, timeouts, exceptions).
-- **Core (`app.core`)**: Manage environment variables, configurations, logging, and base exception definitions.
-- **Dependency Flow**: Flow of execution goes downward. Dependencies must flow downward ONLY: Routers -> Services -> Clients -> Core. No service may import a router. No client may import a service or router.
+## Spec-Driven Development Rules
+- **Do not write code before planning:** You must only write code that is mapped to a task in `specs/how2prompt-mvp/tasks.md` and supported by `specs/how2prompt-mvp/plan.md`.
+- **Core Specification:** The source of truth for the features is `specs/how2prompt-mvp/spec.md`. Do not introduce functionality not defined in the specification.
+- **Project Constitution:** The governing architectural principles are defined in `.specify/memory/constitution.md` (and copied in `specs/constitution.md`). You must verify that every code change conforms to these principles.
+- **Workflow Steps:**
+  1. Read `specs/how2prompt-mvp/spec.md` to understand requirements.
+  2. Read `specs/how2prompt-mvp/plan.md` to understand tech stack and constraints.
+  3. Consult `specs/how2prompt-mvp/tasks.md` and implement the tasks sequentially.
+  4. Write automated tests for each implemented task.
 
-## 2. Platform Invariants
-- **Statelessness**: The service must remain completely stateless. No local database connections, no in-memory session caches, no file persistence. All user history, variables, and context must be supplied by the caller in the request payload.
-- **Strict Pydantic Schema Contracts**: Always define and use strict Pydantic models for request and response structures. Do not use dynamic dictionaries or JSON-any schemas for API payloads.
-- **Agent Framework Restrictions**: Do not use LangChain, LangGraph, or any other agent wrapper library. All agentic routing and orchestration logic must be hand-authored in pure Python using LiteLLM and Pydantic for structured outputs.
-- **Robustness and Resilience**: Wrap LLM calls with exponential backoff retries (maximum 3 attempts) for transient errors. Catch terminal LLM exceptions, format them into an RFC-7807 error layout, and raise an HTTP 502 with `error_code: LLM_PROVIDER_ERROR`.
-- **Environment and Secrets**: Use `pydantic-settings` inside `app/core/config.py` to parse config variables from environment variables. Never hardcode credentials.
-
-## 3. Python and FastAPI Conventions
-- **Type Annotations**: All function parameters, return types, and class variables must have explicit type annotations.
-- **FastAPI Endpoints**: Use kebab-case for endpoint URLs (e.g., `/api/v1/agent/optimize`). Use Pydantic models for request bodies and response types.
-- **Testing**: Write pytest tests for all additions. Mock external LLM calls using pytest fixtures and `unittest.mock`.
-- **Logging**: Use structured JSON logs in production, and standard readable logs in local development. Never use raw print statements.
+## Key Platform Constraints (from Constitution)
+- **Stateless Python Service:** The Python Prompt Service must remain 100% stateless. Do not add database connections or persistent state. All parameters must come via the request body.
+- **FastAPI / Pydantic Contracts:** Request and response schemas must be strictly defined with Pydantic. Do not use raw dictionary inputs.
+- **LiteLLM Wrapper:** Use LiteLLM for LLM connections. Do not install LangChain or LangGraph.
+- **Retry & Error Standards:** Implement tenacity backoff retries for LLM calls (up to 3 times). Catch failures and format error responses as RFC-7807 problem details (HTTP 502 with `LLM_PROVIDER_ERROR` code).
+- **Postgres JSONB:** The database uses JSONB columns to persist active variables and history logs.
