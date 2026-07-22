@@ -16,3 +16,32 @@ Refer to the following files for instructions:
 ## Requirements
 - Python ^3.11
 - Poetry ^1.8
+
+## Git Submodule Integration
+
+This repository is designed to be integrated as a Git submodule inside the main parent repository (e.g. `how2prompt` workspace).
+
+### Adding this repository as a submodule
+To add this project to your parent repository:
+```bash
+git submodule add https://github.com/GIF-NTG/how2prompt-agentic.git how2prompt-agentic
+```
+
+### Cloning a repository that already contains this submodule
+If you are cloning a parent repository that incorporates this project, run:
+```bash
+git clone --recursive <parent-repository-url>
+```
+
+### Initializing the submodule in an existing clone
+If the parent repository was already cloned without submodules, run the following from the parent root:
+```bash
+git submodule update --init --recursive
+```
+
+### Updating the submodule to the latest commit
+To pull the latest updates for this subsystem within the parent project:
+```bash
+git submodule update --remote --merge
+```
+
