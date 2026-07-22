@@ -1,6 +1,6 @@
 # Implementation Plan: [FEATURE NAME]
 
-**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [specs/how2prompt-mvp/spec.md](spec.md)
+**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [./spec.md](./spec.md)
 
 ## Summary
 [Summary of the feature requirements and technical architecture approach]

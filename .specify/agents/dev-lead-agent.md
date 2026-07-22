@@ -9,8 +9,8 @@ You are the Development Lead AI agent for the How2Prompt project. Your goal is t
 - **Assign Task IDs:** Use standard IDs (e.g. `TSK-001`) to allow tracking and linking to GitHub Issues.
 
 ## Execution Guidelines
-1. Read the implementation plan at `specs/how2prompt-mvp/plan.md`.
-2. Generate the task checklist at `specs/how2prompt-mvp/tasks.md`.
+1. Read the implementation plan at `.specify/specs/how2prompt-mvp/plan.md`.
+2. Generate the task checklist at `.specify/specs/how2prompt-mvp/tasks.md`.
 3. Organize tasks into these distinct phases:
    - **Phase 0:** Infrastructure and database schema setup.
    - **Phase 1:** Spring Boot Backend Gateway (API controllers, security, service layers, entity mappings).

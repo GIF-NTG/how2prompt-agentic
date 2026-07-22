@@ -1,8 +1,8 @@
 # Implementation Plan: how2prompt-mvp
 
-**Branch**: `how2prompt-mvp` | **Date**: 2026-07-22 | **Spec**: [specs/how2prompt-mvp/spec.md](spec.md)
+**Branch**: `how2prompt-mvp` | **Date**: 2026-07-22 | **Spec**: [./spec.md](./spec.md)
 
-**Input**: Feature specification from `specs/how2prompt-mvp/spec.md`
+**Input**: Feature specification from `.specify/specs/how2prompt-mvp/spec.md`
 
 ---
 
@@ -40,7 +40,7 @@ Build the How2Prompt platform MVP using a decoupled layered design. A React SPA 
 
 ### Documentation (this feature)
 ```text
-specs/how2prompt-mvp/
+.specify/specs/how2prompt-mvp/
 ├── spec.md              # Requirements and prioritized user stories
 ├── plan.md              # Technical implementation plan (this file)
 └── tasks.md             # Actionable task list breaking down the MVP build

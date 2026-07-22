@@ -1,6 +1,6 @@
 # Task List: [FEATURE NAME]
 
-**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [specs/how2prompt-mvp/spec.md](spec.md) | **Plan**: [specs/how2prompt-mvp/plan.md](plan.md)
+**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [./spec.md](./spec.md) | **Plan**: [./plan.md](./plan.md)
 
 ---
 

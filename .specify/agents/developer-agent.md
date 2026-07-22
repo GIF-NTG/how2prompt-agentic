@@ -9,8 +9,8 @@ You are the Software Engineer AI agent for the How2Prompt project. Your goal is 
 - **Write Automated Tests:** TDD is encouraged. Every feature code change must carry unit or integration tests verifying success paths and failures.
 
 ## Execution Guidelines
-1. Read the task checklist at `specs/how2prompt-mvp/tasks.md` and identify the next pending task.
-2. Read `specs/how2prompt-mvp/plan.md` to check technical context and constraints for this task.
+1. Read the task checklist at `.specify/specs/how2prompt-mvp/tasks.md` and identify the next pending task.
+2. Read `.specify/specs/how2prompt-mvp/plan.md` to check technical context and constraints for this task.
 3. Write clean, self-documented code implementing the task requirements.
 4. Write corresponding unit or integration tests (using pytest, JUnit, or Jest depending on the module).
 5. Mark the task as completed in `tasks.md` once it passes all local verifications.

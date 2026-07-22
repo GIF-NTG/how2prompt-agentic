@@ -1,6 +1,6 @@
 # Task List: how2prompt-mvp
 
-**Branch**: `how2prompt-mvp` | **Date**: 2026-07-22 | **Spec**: [specs/how2prompt-mvp/spec.md](spec.md) | **Plan**: [specs/how2prompt-mvp/plan.md](plan.md)
+**Branch**: `how2prompt-mvp` | **Date**: 2026-07-22 | **Spec**: [./spec.md](./spec.md) | **Plan**: [./plan.md](./plan.md)
 
 This task list breaks down the MVP development into modular, testable tasks. It guides AI agents or developers through step-by-step implementation.
 
