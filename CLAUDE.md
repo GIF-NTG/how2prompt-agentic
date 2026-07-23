@@ -1,5 +1,14 @@
 # CLAUDE.md — how2prompt-agentic
 
+This repo is shared Spec-Kit tooling (skills/commands/scripts/templates), submoduled
+into how2prompt's service repositories via `scripts/sync.sh` — see `README.md` for the
+integration pattern. Only `.claude/skills`, `.cursor/skills`, `.opencode/commands`,
+`.specify/scripts`, `.specify/templates` (top-level), and `.specify/workflows` are the
+shared surface synced into other repos; everything else under `.specify/` (`agents/`,
+`memory/`, `specs/`, `templates/overrides/`, the `*.json` state files) plus `docs/` is
+this repo's own local example/governance content and must not be assumed present in a
+consuming project.
+
 ## Spec-Driven Development (SDD) Workflow
 This project uses GitHub's **Spec-Kit** to manage software requirements, technical planning, and task execution. All development must follow the Spec-Driven Development cycle.
 
@@ -15,9 +24,8 @@ This project uses GitHub's **Spec-Kit** to manage software requirements, technic
   - Sync with issues: `/speckit.taskstoissues`
   - Verify gaps: `/speckit.converge`
 
-## Project Structure & Invariants
-All architecture decisions must respect the Project Constitution (`.specify/memory/constitution.md`):
-- **Statelessness:** The Python optimizer service must have no databases, local caches, or disk state.
-- **Data Contracts:** All interfaces must use rigid Pydantic models. Dynamic dictionary parsing on main routes is prohibited.
-- **Storage:** PostgreSQL is used for persistence. Active variables and execution snapshots must be stored in PostgreSQL `JSONB` columns to prevent EAV bloat.
-- **LLM Engine:** Use LiteLLM and Pydantic. Do not use LangChain or LangGraph. Enforce exponential backoff retries (maximum 3) and map terminal exceptions to RFC-7807 Bad Gateway error details.
+## This Repo's Own Governance (local-only, not synced)
+This repo dogfoods Spec-Kit for itself. Its own architecture decisions must respect
+`.specify/memory/constitution.md` (Python/Postgres/LiteLLM stack invariants for the
+how2prompt-mvp example service) — that constitution applies to this repo's own example
+content only, not to projects that submodule this repo.
