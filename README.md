@@ -54,6 +54,70 @@ git commit -m "chore: update how2prompt-agentic shared tooling"
 See section 1 below for the full rationale (why copy instead of symlink), section 3 for
 the full slash-command reference, and section 4 for what's synced vs. local-only.
 
+The submodule + sync mechanism is identical for every service, regardless of stack —
+only the constitution/spec content you write in step 4 differs, since it should reflect
+that service's own architecture (React vs. Spring Boot vs. Python, etc.).
+
+### Example: integrating into `how2prompt-ui` (frontend)
+
+```bash
+# From the root of how2prompt-ui (where package.json lives):
+
+# 1. Install the Spec-Kit CLI (once per machine)
+uv tool install specify-cli   # or: pipx install specify-cli
+specify version
+
+# 2. Add this repo as a submodule
+git submodule add https://github.com/GIF-NTG/how2prompt-agentic.git how2prompt-agentic
+
+# 3. Sync the shared skills/commands/templates into how2prompt-ui
+bash how2prompt-agentic/scripts/sync.sh
+
+# 4. Inside your AI assistant, create how2prompt-ui's OWN constitution and spec
+#    (this writes to how2prompt-ui's .specify/memory and .specify/specs, never
+#    into the how2prompt-agentic submodule itself)
+#    /speckit.constitution
+#    /speckit.specify "describe the frontend feature"
+
+# 5. Commit the submodule pointer and the synced (generated, non-symlinked) files
+git add .gitmodules how2prompt-agentic .claude .cursor .opencode .specify
+git commit -m "chore: integrate how2prompt-agentic shared Spec-Kit tooling"
+```
+
+### Example: integrating into `how2prompt-api` (backend)
+
+```bash
+# From the root of how2prompt-api (where pom.xml lives):
+
+# 1. Install the Spec-Kit CLI (once per machine)
+uv tool install specify-cli   # or: pipx install specify-cli
+specify version
+
+# 2. Add this repo as a submodule
+git submodule add https://github.com/GIF-NTG/how2prompt-agentic.git how2prompt-agentic
+
+# 3. Sync the shared skills/commands/templates into how2prompt-api
+bash how2prompt-agentic/scripts/sync.sh
+
+# 4. Inside your AI assistant, create how2prompt-api's OWN constitution and spec
+#    (writes to how2prompt-api's .specify/memory and .specify/specs, reflecting its
+#    own Java/Spring Boot architecture — never into the how2prompt-agentic submodule)
+#    /speckit.constitution
+#    /speckit.specify "describe the backend feature"
+
+# 5. Commit the submodule pointer and the synced (generated, non-symlinked) files
+git add .gitmodules how2prompt-agentic .claude .cursor .opencode .specify
+git commit -m "chore: integrate how2prompt-agentic shared Spec-Kit tooling"
+```
+
+Later, to pick up updates published to `how2prompt-agentic` (same for either repo):
+```bash
+git submodule update --remote --merge how2prompt-agentic
+bash how2prompt-agentic/scripts/sync.sh
+git add how2prompt-agentic .claude .cursor .opencode .specify
+git commit -m "chore: update how2prompt-agentic shared tooling"
+```
+
 ---
 
 ## 1. Git Submodule Integration
