@@ -1,125 +1,178 @@
-# Tài liệu Đặc tả Yêu cầu Phần mềm (SRS) — How2Prompt Web App
+# Software Requirements Specification (SRS) — How2Prompt Web App
 
-Tài liệu này gộp toàn bộ các thông tin từ PRD, Phụ lục kỹ thuật, Tài liệu giải pháp và Phân rã User Stories thành một tài liệu Đặc tả Yêu cầu Phần mềm (SRS) duy nhất cho dự án **How2Prompt**.
-
----
-
-## 1. Giới thiệu & Tầm nhìn (Introduction & Vision)
-
-### 1.1 Tầm nhìn Sản phẩm (Product Vision)
-**How2Prompt** là một ứng dụng web tối giản được thiết kế để huấn luyện và nâng cao kỹ năng viết prompt cho người dùng thông qua việc thực hành cấu trúc prompt chuẩn chỉnh (bao gồm 3 thành phần cốt lõi: **Vai trò - Role, Bối cảnh - Context, Ràng buộc - Constraints**).
-
-Thay vì cung cấp các prompt viết sẵn hoàn chỉnh khiến người dùng lười tư duy, How2Prompt chỉ cung cấp các **mẫu cấu trúc trống (Empty Templates)** đi kèm hướng dẫn. Người dùng trực tiếp tương tác, điền thông tin thực tế của mình vào các ô trống (placeholders) để tạo ra prompt chất lượng cao để copy.
-
-### 1.2 Đối tượng Người dùng & Jobs To Be Done
-* **Khách (Guest):** Người dùng vãng lai chưa đăng ký tài khoản. Nhiệm vụ cần thực hiện (JTBD) là duyệt danh mục, điền placeholder và copy nhanh prompt mà không cần tạo tài khoản.
-* **Thành viên (Member):** Người dùng đã đăng nhập. JTBD là lưu trữ tự động lịch sử các lần prompt để tái sử dụng nhanh chóng và xóa lịch sử khi không cần thiết.
-
-### 1.3 Mục tiêu ngoài phạm vi (Non-Goals)
-* Không tích hợp cửa sổ chat trực tiếp với AI (ChatGPT, Gemini, v.v.) trên ứng dụng How2Prompt.
-* Không đồng bộ đám mây (Cloud Sync) cho đối tượng Khách (Guest).
-* Không tự động sinh template bằng AI (AI Template Recommendation).
+This document integrates all requirements from the PRD, technical specifications, architecture decisions, and epic/story breakdowns into a single Software Requirements Specification (SRS) for the **How2Prompt** platform.
 
 ---
 
-## 2. Hành trình Người dùng Cốt lõi (Key User Journeys)
+## 1. Introduction & Vision
 
-* **UJ-1: Nam (Khách chưa đăng nhập) điền placeholder trực tiếp và sao chép prompt.**
-  * *Bối cảnh:* Nam, lập trình viên muốn viết prompt báo cáo lỗi tốt hơn.
-  * *Hành trình:* Vào trang chủ ➔ Chọn template debug ➔ Điền inline trực tiếp các placeholder ➔ Nhấn "Hoàn thành" ➔ Hệ thống sinh prompt đầy đủ ➔ Bấm "Sao chép nhanh" ➔ Dán vào AI chat ngoài.
-* **UJ-2: Minh (Thành viên đã đăng nhập) sử dụng prompt và xem lại lịch sử.**
-  * *Bối cảnh:* Minh, QA muốn tái sử dụng các prompt viết test case cũ.
-  * *Hành trình:* Đăng nhập ➔ Tạo prompt ở trang chủ (tự động lưu vào DB) ➔ Vào trang "Lịch sử" ➔ Tìm prompt cũ ➔ Bấm "Copy nhanh" trên dòng lịch sử mà không cần điền lại.
+### 1.1 Product Vision
+**How2Prompt** is a minimal web application designed to train and improve users' prompt engineering skills through direct practice with standard prompt structures. It enforces a core three-part structure: **Role, Context, and Constraints**.
 
----
+Unlike tools that provide static pre-written prompts, How2Prompt offers **Empty Templates** with placeholder fields. Users interact directly with these templates, filling in their context inline, and use keyboard-first operations to compile, optimize, and copy high-quality prompts to their clipboard.
 
-## 3. Danh sách Yêu cầu Hệ thống
+### 1.2 User Personas & Jobs To Be Done (JTBD)
+* **Guest (Unauthenticated User):** Wants to browse templates, fill in placeholders, and quickly copy prompt outputs without the friction of account creation.
+* **Member (Authenticated User):** Wants to automatically save prompt history snapshots to reload and reuse past prompt configurations, as well as configure personalized/team-wide global variables.
+* **Team Lead (Authenticated Admin/Manager):** Wants to define organization-wide variables that automatically populate into team member templates to enforce standardized coding or environment constraints.
 
-### 3.1 Yêu cầu Chức năng (Functional Requirements - FRs)
-* **FR-1:** Hiển thị danh sách các Template trống dưới dạng các thẻ (cards).
-* **FR-2:** Lọc danh sách template theo các nút Tag/Filter chủ đề (ví dụ: `#debugging`, `#marketing`).
-* **FR-3:** Tìm nhanh template dựa trên ô tìm kiếm từ khóa.
-* **FR-4:** Hiển thị các trường placeholder trống dạng input inline nằm trực tiếp trong cấu trúc câu của template.
-* **FR-5:** Ô nhập liệu inline tự động co giãn chiều rộng (auto-resize width) theo độ dài chữ gõ.
-* **FR-6:** Tự động lưu các giá trị đang điền vào `localStorage` của trình duyệt.
-* **FR-7:** Nút "Reset" để xóa sạch dữ liệu đã điền trong template đang chọn.
-* **FR-8:** Nút "Hoàn thành" để ghép các giá trị placeholder với phần chữ tĩnh sinh ra Đoạn Prompt hoàn chỉnh.
-* **FR-9:** Nút "Sao chép" (Copy) bên cạnh Đoạn Prompt hoàn chỉnh kèm toast "Đã sao chép" trong 2 giây.
-* **FR-10:** Ràng buộc điền đầy đủ placeholder khi bấm "Hoàn thành" (ngăn kết xuất, highlight đỏ và focus).
-* **FR-11:** Đăng ký tài khoản mới và đăng nhập thành viên.
-* **FR-12:** Đăng xuất tài khoản an toàn.
-* **FR-13:** Duy trì phiên đăng nhập của người dùng qua JWT token lưu ở localStorage.
-* **FR-14:** Tự động lưu prompt hoàn chỉnh, tên template, các giá trị và thời gian tạo vào Postgres cho Member.
-* **FR-15:** Xem danh sách các lần prompt trước đó trong trang Lịch sử, sắp xếp mới nhất.
-* **FR-16:** Nút "Copy nhanh" trên mỗi dòng lịch sử để sao chép trực tiếp.
-* **FR-17:** Xóa từng bản ghi lịch sử prompt khỏi cơ sở dữ liệu.
-
-### 3.2 Yêu cầu Phi chức năng (Non-Functional Requirements - NFRs)
-* **NFR-1 (Hiệu năng):** Thao tác gõ của người dùng trên ô input inline phải phản hồi tức thì (< 50ms), chiều rộng ô tự co giãn mượt mà.
-* **NFR-2 (Tương thích):** Chạy tốt trên Chrome, Safari, Edge, và Firefox (Desktop & Mobile).
-* **NFR-3 (Bảo mật):** Mật khẩu người dùng được băm (hash) bằng BCrypt trước khi lưu. JWT truyền tải qua kênh bảo mật HTTPS.
+### 1.3 Non-Goals
+* No direct AI chat interface (e.g. ChatGPT/Gemini window) inside How2Prompt itself. The app is dedicated to prompt drafting and copy-to-clipboard.
+* No Cloud synchronization or history persistence for Guests.
+* No automated template generation or AI-based template recommendations for users.
 
 ---
 
-## 4. Thiết kế Kỹ thuật & Cơ sở Dữ liệu
+## 2. Key User Journeys
 
-### 4.1 Công nghệ Sử dụng
-* **Frontend:** React (SPA, Vite), Axios gọi API, React Context API quản lý trạng thái đăng nhập.
-* **Backend:** Java Spring Boot 3.2.x, JPA/Hibernate kết nối DB, Spring Security + JWT Filter bảo mật.
-* **Database:** PostgreSQL 15.x.
-
-### 4.2 Thiết kế Cơ sở Dữ liệu (Database Schema)
-
-* Bảng **`users`** (Khóa chính UUID): Lưu thông tin email, username, password_hash.
-* Bảng **`prompt_templates`** (Khóa chính UUID): Lưu tiêu đề template, mô tả cấu trúc, raw_template (chứa cú pháp placeholder `{ten_truong}`) và mảng tags.
-* Bảng **`prompt_histories`** (Khóa chính UUID, khóa ngoại `user_id` và `template_id`): Lưu `filled_values` (JSONB) và `generated_prompt` (TEXT). Đánh index trên `(user_id, created_at DESC)`.
-
-### 4.3 Đặc tả REST API
-* `POST /api/auth/register` - Đăng ký tài khoản.
-* `POST /api/auth/login` - Đăng nhập nhận JWT Token (hạn 7 ngày).
-* `GET /api/templates` - Lấy danh mục template trống (công khai).
-* `GET /api/histories` - Lấy danh sách lịch sử prompt của Member (yêu cầu JWT).
-* `POST /api/histories` - Lưu lịch sử prompt của Member (yêu cầu JWT).
-* `DELETE /api/histories/{id}` - Xóa bản ghi lịch sử prompt của Member (yêu cầu JWT).
+* **UJ-1: Guest fills inline template and copies prompt using keyboard-first flow.**
+  * *Context:* Nam, a developer, wants to quickly generate a debug prompt.
+  * *Journey:* Open homepage ➔ Press `Ctrl+K` to open the Command Palette search ➔ Type "debug" and press `Enter` to load the template ➔ Press `Tab` to navigate through empty placeholder pills ➔ Type inline values directly (the input box auto-resizes dynamically) ➔ Press `Ctrl+Enter` to resolve variables, compile the prompt, and copy it to the clipboard ➔ Paste into an external AI chat.
+* **UJ-2: Team Lead configures shared team variables.**
+  * *Context:* Minh, a QA lead, wants to enforce a team-wide coding guideline variable.
+  * *Journey:* Log in ➔ Navigate to Settings ➔ Define global team variable `{team_coding_standards}` ➔ Save (stores as JSONB in DB). Developers on the same team open templates referencing this variable, and it pre-populates automatically.
+* **UJ-3: Member accesses history drawer to reload past prompt settings.**
+  * *Context:* Chi, a developer, wants to re-run a prompt used yesterday.
+  * *Journey:* Log in ➔ Open the Quick-History Drawer ➔ Browse the list of the last 20 compiled prompts ➔ Click a history card ➔ The Canvas reloads the template and restores all variables to their exact past values.
 
 ---
 
-## 5. Phân rã Epics & Stories Chi tiết
+## 3. System Requirements
 
-### Epic 1: Trình tạo và Sao chép Prompt tối giản
-* **Story 1.1: Tạo khung dự án & Hiển thị danh mục Template trống từ DB**
-  * *Acceptance Criteria:* API `GET /api/templates` hoạt động tốt. React kết xuất danh sách template dạng thẻ (cards) hiển thị tiêu đề, mô tả và tag.
-* **Story 1.2: Lọc theo Tag và Tìm kiếm Template**
-  * *Acceptance Criteria:* Bấm tag filter danh sách động; Nhập ô tìm kiếm lọc template có tiêu đề/mô tả chứa từ khóa.
-* **Story 1.3: Trình soạn thảo điền Inline với tự co giãn ô nhập liệu**
-  * *Acceptance Criteria:* Các placeholder hiển thị dạng input text inline trong dòng câu. Người dùng gõ chữ, ô input tự co giãn kích thước (auto-resize width) khớp với độ dài ký tự thực tế.
-* **Story 1.4: Tự động lưu LocalStorage & Nút Reset**
-  * *Acceptance Criteria:* Đóng tab/F5 trang React tự khôi phục dữ liệu từ LocalStorage. Bấm "Reset" xóa sạch dữ liệu placeholders của template hiện tại.
-* **Story 1.5: Kết xuất Prompt hoàn chỉnh & Sao chép nhanh**
-  * *Acceptance Criteria:* Điền đủ bấm "Hoàn thành" sinh prompt ghép chữ. Bấm "Sao chép" copy vào clipboard và hiển thị toast 2 giây. Thiếu ô bắt buộc, ngăn sinh prompt, highlight đỏ và focus ô trống đầu tiên.
+### 3.1 Functional Requirements (FRs)
+* **FR-001 (Authentication):** Users MUST authenticate via stateless JWT tokens on all API calls (except public templates list retrieval).
+* **FR-002 (Template Catalog):** The homepage MUST display public templates as cards, showing the title, description, and tags (e.g. `#debugging`, `#marketing`).
+* **FR-003 (Command Palette):** The application MUST support a fuzzy-search Command Palette triggered by `Ctrl+K` to find and load templates with under 50ms latency.
+* **FR-004 (Variable Canvas):** The loaded template MUST render placeholders as inline input pills. The canvas MUST support keyboard navigation (`Tab` and `Shift+Tab`) to cycle focus through editable variable pills.
+* **FR-005 (Inline Auto-Resize):** Inline variable input fields MUST auto-resize their width dynamically based on the character length typed, preserving sentence flow.
+* **FR-006 (Draft Auto-Save):** The client application MUST automatically save draft variable inputs to `localStorage` per template, persisting state across page refreshes (F5).
+* **FR-007 (Input Validation):** If the user triggers copy execution while mandatory variable pills remain empty, the copy action MUST block and automatically shift focus to the first empty pill.
+* **FR-008 (Prompt Compiler):** Resolving variables compiles the prompt by replacing placeholders, stripping empty optional variables, cleaning up extra whitespaces, and copying the result to the clipboard.
+* **FR-009 (Copy Feedback):** Copying to the clipboard triggers a non-blocking toast notification reading "Copied!" for 2 seconds.
+* **FR-010 (Stateless Prompt Optimization):** The backend MUST delegate prompt optimizations to a stateless Python Prompt Service that formats the template and checks structured schemas.
+* **FR-011 (JSONB User Variables):** The backend MUST support GET/PUT routes for users to store global variable configurations in PostgreSQL JSONB fields.
+* **FR-012 (History Snapshots):** Copy execution for Members automatically pushes a snapshot of the variables and the compiled prompt to the PostgreSQL database (maximum 20 items per user).
+* **FR-013 (History Reloading):** Clicking a card in the history list MUST reload the associated template and restore all placeholder values on the Variable Canvas.
+* **FR-014 (History Management):** Members can delete individual prompt history entries from the database.
 
-### Epic 2: Xác thực & Quản lý Tài khoản
-* **Story 2.1: Đăng ký tài khoản Member**
-  * *Acceptance Criteria:* Tạo bảng `users`. API `POST /api/auth/register` hoạt động tốt (băm mật khẩu BCrypt). Giao diện React đăng ký thành công chuyển hướng về `/login`.
-* **Story 2.2: Đăng nhập tài khoản & Nhận JWT Token**
-  * *Acceptance Criteria:* API `POST /api/auth/login` kiểm tra mật khẩu, sinh JWT Token. Sai tài khoản trả về `401 Unauthorized` có định dạng lỗi JSON chuẩn.
-* **Story 2.3: Duy trì phiên đăng nhập & Đăng xuất an toàn**
-  * *Acceptance Criteria:* Có token, React lưu LocalStorage và cập nhật trạng thái `AuthContext`. F5 trang tự khôi phục phiên đăng nhập. Bấm "Đăng xuất" xóa token, xóa context và về trang chủ.
-
-### Epic 3: Lưu trữ & Quản lý Lịch sử Prompt
-* **Story 3.1: Tự động ghi nhận Lịch sử Prompt khi tạo thành công**
-  * *Acceptance Criteria:* Tạo bảng `prompt_histories`. Khi Member bấm "Hoàn thành", React gửi `POST /api/histories` đính kèm JWT header. Service Spring Boot lưu thông tin thành công trong phương thức `@Transactional`.
-* **Story 3.2: Xem danh sách Lịch sử Prompt**
-  * *Acceptance Criteria:* Vào trang Lịch sử gọi `GET /api/histories` (có JWT header) lấy lịch sử sắp xếp mới nhất hiển thị lên React.
-* **Story 3.3: Sao chép nhanh từ Lịch sử & Xóa lịch sử**
-  * *Acceptance Criteria:* Bấm "Copy nhanh" trên dòng lịch sử sao chép prompt trực tiếp. Bấm "Xóa" gọi `DELETE /api/histories/{id}` xóa dữ liệu trong DB và gỡ khỏi danh sách React.
+### 3.2 Non-Functional Requirements (NFRs)
+* **NFR-1 (UI Performance):** Key press actions and inline input auto-resizing MUST execute with sub-50ms latency. The React workspace First Contentful Paint (FCP) MUST be under 200ms, and Time to Interactive (TTI) under 500ms.
+* **NFR-2 (Resilient LLM Connections):** All upstream AI model requests made by the Python service MUST execute with exponential backoff retries (maximum 3 attempts) via Tenacity.
+* **NFR-3 (Error Handling Standards):** In the event of terminal upstream LLM failures, the system MUST return RFC-7807 Bad Gateway details (`HTTP 502`, `LLM_PROVIDER_ERROR`). Validation errors must also return standard RFC-7807 JSON details.
+* **NFR-4 (Security & Encryption):** User passwords MUST be benched and hashed using BCrypt. All JWT transmission MUST be encrypted over secure HTTPS channels.
+* **NFR-5 (Cross-Browser Compatibility):** The client application must function correctly on Chrome, Safari, Edge, and Firefox (across desktop and mobile dimensions).
 
 ---
 
-## 6. Thuật ngữ (Glossary)
-* **Template trống (Empty Template):** Bản thiết kế cấu trúc prompt chứa các câu lệnh định hướng cố định kết hợp với các ô trống (Placeholder Field).
-* **Trường nhập liệu (Placeholder Field):** Ô trống được định nghĩa sẵn trong template để người dùng click vào và điền giá trị cụ thể.
-* **Điền trực tiếp (Inline Filling):** Trải nghiệm nhập văn bản trực tiếp ngay trên dòng của template.
-* **Đoạn Prompt hoàn chỉnh (Generated Prompt):** Kết quả văn bản cuối cùng được tạo ra bằng cách ghép các giá trị người dùng đã điền vào đúng vị trí trong Template trống.
-* **Sao chép nhanh (Quick Copy):** Hành động sao chép Đoạn Prompt hoàn chỉnh vào clipboard chỉ bằng một click chuột.
-* **Bộ lọc nhanh (Quick Filters/Tags):** Cơ chế lọc các Template trống theo chủ đề.
+## 4. Technical Design & Databases
+
+### 4.1 3-Tier Decoupled Architecture
+The platform is split into three decoupled, single-responsibility layers:
+1. **Frontend (React SPA):** Handles UI layout, keyboard bindings, input auto-resizing, and local draft synchronization.
+2. **Gateway (Spring Boot):** Handles JWT validations, Postgres SQL migrations, business logic routing, and acts as the secure intermediary API gateway.
+3. **Prompt Service (FastAPI):** A stateless Python service executing LLM prompt optimizations using LiteLLM. It maintains no DB connection or disk state; all guidelines are passed dynamically.
+
+```
+[React SPA Client] <---(HTTPS / JWT)---> [Spring Boot Gateway] <---(REST / JSON)---> [FastAPI Prompt Service]
+                                                  |
+                                           [PostgreSQL DB]
+```
+
+### 4.2 Database Schema
+The relational schema uses PostgreSQL with UUID primary keys. Personal/team variables and prompt snapshots are stored inside JSONB columns:
+
+* **`users`**
+  * `id` (UUID, Primary Key)
+  * `email` (VARCHAR, Unique)
+  * `username` (VARCHAR)
+  * `password_hash` (VARCHAR)
+  * `created_at` (TIMESTAMP)
+* **`teams`**
+  * `id` (UUID, Primary Key)
+  * `name` (VARCHAR)
+* **`templates`**
+  * `id` (UUID, Primary Key)
+  * `title` (VARCHAR)
+  * `description` (TEXT)
+  * `raw_template` (TEXT) - Prompts with `{variable_name}` syntax
+  * `tags` (VARCHAR[])
+* **`user_variables`**
+  * `user_id` (UUID, Foreign Key referencing `users.id`)
+  * `variables` (JSONB) - Flexible key-value configurations (e.g. `{ "team_coding_standards": "..." }`)
+* **`history`**
+  * `id` (UUID, Primary Key)
+  * `user_id` (UUID, Foreign Key referencing `users.id`)
+  * `template_id` (UUID, Foreign Key referencing `templates.id`)
+  * `variable_snapshot` (JSONB) - Snapshot of pills filled at copy time
+  * `generated_prompt` (TEXT) - Compiled output prompt
+  * `created_at` (TIMESTAMP) - Indexed with user_id: `(user_id, created_at DESC)`
+
+### 4.3 REST API Endpoints & Error Payload
+All endpoints are kebab-cased under the `/api/v1` namespace:
+
+* **Auth Endpoints:**
+  * `POST /api/v1/auth/register` - Create account
+  * `POST /api/v1/auth/login` - Authenticate & receive JWT token (7-day validity)
+* **Template Endpoints:**
+  * `GET /api/v1/templates` - Retrieve public template cards
+* **Variable Endpoints:**
+  * `GET /api/v1/users/me/variables` - Retrieve saved user/team variable settings
+  * `PUT /api/v1/users/me/variables` - Store updated variable configurations
+* **History Endpoints:**
+  * `GET /api/v1/history` - Retrieve user's prompt history list (sorted by newest, max 20 entries)
+  * `POST /api/v1/history` - Log a new prompt compilation snapshot
+  * `DELETE /api/v1/history/{id}` - Remove a specific history snapshot
+* **Agent Endpoints:**
+  * `POST /api/v1/agent/optimize` - Stateless route called by the Gateway to process and optimize prompt models via FastAPI.
+
+#### RFC-7807 Error Envelope Example (502 Bad Gateway):
+```json
+{
+  "type": "https://how2prompt.com/errors/llm-provider-error",
+  "title": "Bad Gateway",
+  "status": 502,
+  "detail": "The upstream LLM provider timed out after 5 seconds.",
+  "instance": "/api/v1/agent/optimize",
+  "error_code": "LLM_PROVIDER_ERROR"
+}
+```
+
+---
+
+## 5. Detailed Epics & User Stories
+
+### Epic 1: Keyboard-First Prompt Creation Workspace
+* **Story 1.1: Dashboard Layout & Command Palette Search**
+  * *Acceptance Criteria:* Pressing `Ctrl+K` toggles a fuzzy-search Command Palette search box. Selecting an option loads the template onto the Canvas. Search responses load under 50ms.
+* **Story 1.2: Inline Variable Canvas Editor**
+  * *Acceptance Criteria:* Placeholders render as inline input text pills. Tabbing focuses through consecutive pills. Inputs auto-adjust their width to match the length of the string typed.
+* **Story 1.3: Local Draft Backup & State Clear**
+  * *Acceptance Criteria:* Changes to variables auto-save to `localStorage`. Page reload (F5) restores the draft. Pressing the "Reset" hotkey or button clears current inputs.
+* **Story 1.4: Prompt Compiler, Verification, & Copy Action**
+  * *Acceptance Criteria:* Pressing `Ctrl+Enter` checks variable inputs. If mandatory fields are empty, the copy action blocks, highlights the empty fields red, and focus is shifted to the first empty pill. Otherwise, variables are compiled, whitespaces are formatted, and the compiled string is written to clipboard alongside a 2-second "Copied!" toast.
+
+### Epic 2: Authentication & Context Configurations
+* **Story 2.1: Member Account Registration & Login**
+  * *Acceptance Criteria:* Registers users and hashes passwords via BCrypt. Login checks password and issues a 7-day JWT token. Invalid authentication responds with a standard RFC-7807 401 Unauthorized envelope.
+* **Story 2.2: Context Retention & Decoupled JWT Sessions**
+  * *Acceptance Criteria:* JWT is saved to `localStorage` and sent with requests via Axios client interceptors. F5 reload restores user context. Logging out clears the JWT and redirects back to homepage.
+* **Story 2.3: Team Variables Configuration**
+  * *Acceptance Criteria:* Team Leads can save key-value variable mappings. The backend gateway stores configuration objects in PostgreSQL JSONB column `user_variables.variables`. When members load templates containing team variables, values are pre-populated automatically.
+
+### Epic 3: Stateless Optimization & History Management
+* **Story 3.1: Resilient Upstream Prompt Optimization**
+  * *Acceptance Criteria:* Spring Boot routes requests to Python FastAPI `/api/v1/agent/optimize`. The FastAPI client manages LiteLLM calls. Transient errors trigger up to 3 retries (exponential backoff). Hard timeouts return standard RFC-7807 Bad Gateway error detail envelopes.
+* **Story 3.2: Execution History Logger & Reload**
+  * *Acceptance Criteria:* Member copy commands trigger gateway requests to `POST /api/v1/history` under a `@Transactional` boundary, saving snapshot values inside `history.variable_snapshot` (JSONB). Drawer displays up to 20 past snapshots sorted by newest. Clicking a card restores the template and values to the Canvas.
+* **Story 3.3: History Deletion**
+  * *Acceptance Criteria:* Clicking delete on history drawer rows executes `DELETE /api/v1/history/{id}` and updates UI immediately.
+
+---
+
+## 6. Glossary
+* **Empty Template:** A predefined prompt outline containing fixed instructions and variable placeholder slots.
+* **Variable Pill:** An inline input block within the template body where users type custom parameters.
+* **Command Palette:** A keyboard-triggered search drawer (`Ctrl+K`) used to search and swap template canvas workspaces.
+* **Prompt Compiler:** The utility that replaces variables within a template, formats whitespaces, and writes the output string to clipboard.
+* **JSONB Columns:** PostgreSQL binary JSON format used to store variable mappings and snapshot logs dynamically without tabular structure bloat.
+* **RFC-7807:** The internet standard (RFC-7807) detailing uniform JSON error shapes in HTTP responses.
