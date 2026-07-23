@@ -118,6 +118,22 @@ git add how2prompt-agentic .claude .cursor .opencode .specify
 git commit -m "chore: update how2prompt-agentic shared tooling"
 ```
 
+### Tracking a non-default branch (e.g. an unmerged feature branch)
+
+To try out changes before they land on `main`, point the submodule at a specific
+branch instead:
+```bash
+git submodule add -b truonglong https://github.com/GIF-NTG/how2prompt-agentic.git how2prompt-agentic
+```
+
+If the submodule already exists and you just want to switch which branch it tracks:
+```bash
+git submodule set-branch -b truonglong how2prompt-agentic
+git submodule update --remote how2prompt-agentic
+```
+
+Once that branch merges into `main`, switch back with `git submodule set-branch -b main how2prompt-agentic`.
+
 ---
 
 ## 1. Git Submodule Integration
