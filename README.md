@@ -13,6 +13,49 @@ synced into other services (see below).
 
 ---
 
+## Quick Start
+
+For a service repo (`frontend/`, `backend/`, `agent/`, ...) that doesn't have this
+tooling yet:
+
+```bash
+# 1. Install the Spec-Kit CLI (once per machine)
+uv tool install specify-cli   # or: pipx install specify-cli
+specify version               # sanity check
+
+# 2. From the root of your service repo, add this repo as a submodule
+git submodule add <repository-url> how2prompt-agentic
+
+# 3. Copy the shared skills/commands/templates into your service repo
+bash how2prompt-agentic/scripts/sync.sh
+
+# 4. Create your service's own constitution and first feature spec
+#    (run inside your AI assistant, e.g. Claude Code / Cursor / OpenCode)
+/speckit.constitution
+/speckit.specify "describe the feature"
+```
+
+If you're cloning a service repo that **already** has this submodule:
+
+```bash
+git submodule update --init --recursive   # pull the submodule's content
+bash how2prompt-agentic/scripts/sync.sh   # re-sync into your local .claude/.cursor/.opencode/.specify
+```
+
+To pick up updates published to this repo later:
+
+```bash
+git submodule update --remote --merge how2prompt-agentic
+bash how2prompt-agentic/scripts/sync.sh
+git add .claude .cursor .opencode .specify how2prompt-agentic
+git commit -m "chore: update how2prompt-agentic shared tooling"
+```
+
+See section 1 below for the full rationale (why copy instead of symlink), section 3 for
+the full slash-command reference, and section 4 for what's synced vs. local-only.
+
+---
+
 ## 1. Git Submodule Integration
 
 This repository is designed to be integrated as a Git submodule inside the **root
