@@ -30,14 +30,20 @@ git submodule update --remote --merge
 ```
 
 ### Link Spec-Kit to the Repository Root (Post-Clone Setup)
-Once you have cloned the submodule inside your service repository (e.g. `backend/` or `frontend/`), you must run the setup script **from the root of your service repository** to enable the Spec-Kit commands/skills in your editor instantly:
+Once you have cloned the submodule parallel to or inside your service repository (e.g. `how2prompt-api/` or `how2prompt-ui/`), you must open your terminal **at the root of your service repository** and run the setup script using its relative path to enable the Spec-Kit commands/skills in your editor instantly:
 
 ```bash
-# Run this from the root of your frontend or backend repository
+# Open terminal at your service repository root (e.g. how2prompt-api/ or how2prompt-ui/)
+cd /path/to/your/service-repo
+
+# If how2prompt-agentic is parallel to your service repository:
+bash ../how2prompt-agentic/setup.sh
+
+# If how2prompt-agentic is inside your service repository:
 bash how2prompt-agentic/setup.sh
 ```
 
-This script will automatically:
+This script dynamically resolves the absolute path of the submodule and will automatically:
 - Symlink the `.specify/` configuration and feature specs directory to the repository root.
 - Symlink all Spec-Kit integration skills to `.claude/skills/` (for Claude Code).
 - Symlink all Spec-Kit integration skills to `.cursor/skills/` (for Cursor).
