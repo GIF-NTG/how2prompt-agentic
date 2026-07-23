@@ -6,31 +6,42 @@ This is the Stateless Prompt Optimization Agent Service, acting as the prompt an
 
 ## 1. Git Submodule Integration
 
-This repository is designed to be integrated as a Git submodule inside the main parent repository (e.g., the `how2prompt` workspace).
+This repository is designed to be integrated as a Git submodule or subdirectory inside the **root directory of a specific service/component repository** (such as your React `frontend/` repository or Spring Boot `backend/` repository). 
 
-### Clone Parent Repository with Submodules
-To clone a parent repository with all its submodules (including this one) initialized:
-```bash
-git clone --recurse-submodules <parent-repository-url>
-```
+Integrating it this way enables your AI coding assistant (Claude Code, Cursor, OpenCode) to access Spec-Kit specifications and commands directly from the workspace root of that specific service.
 
-### Add this Submodule to an Existing Parent Repository
-If you want to manually add this repository as a submodule to a parent repository:
+### Add this Submodule to your Service Repository
+To add this project inside your frontend/backend repository root:
 ```bash
+# From the root of your frontend or backend repository:
 git submodule add <repository-url> how2prompt-agentic
 ```
 
-### Initialize and Update Submodules in an Existing Clone
-If you have already cloned the parent repository without submodules, run the following from the parent root:
+### Initialize and Update Submodules
+If the repository was already cloned without submodules, initialize and update them by running:
 ```bash
 git submodule update --init --recursive
 ```
 
 ### Update the Submodule to the Latest Commit
-To pull the latest updates for this subsystem within the parent project:
+To pull the latest updates for this subsystem within your project:
 ```bash
 git submodule update --remote --merge
 ```
+
+### Link Spec-Kit to the Repository Root (Post-Clone Setup)
+Once you have cloned the submodule inside your service repository (e.g. `backend/` or `frontend/`), you must run the setup script **from the root of your service repository** to enable the Spec-Kit commands/skills in your editor instantly:
+
+```bash
+# Run this from the root of your frontend or backend repository
+bash how2prompt-agentic/setup.sh
+```
+
+This script will automatically:
+- Symlink the `.specify/` configuration and feature specs directory to the repository root.
+- Symlink all Spec-Kit integration skills to `.claude/skills/` (for Claude Code).
+- Symlink all Spec-Kit integration skills to `.cursor/skills/` (for Cursor).
+- Symlink all Spec-Kit integration commands to `.opencode/commands/` (for OpenCode).
 
 ---
 
