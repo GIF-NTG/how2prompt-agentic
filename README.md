@@ -1,14 +1,150 @@
 # how2prompt-agentic
 
-This is the Stateless Prompt Optimization Agent Service, acting as the prompt analysis and variables parser backend for the **how2prompt** platform. This project applies the **Spec-Driven Development (SDD)** workflow managed via GitHub's **Spec-Kit**.
+Shared Spec-Kit configuration for the how2prompt team — the **Spec-Driven Development
+(SDD)** tooling (Claude Code / Cursor / OpenCode skills & commands, CLI scripts,
+templates, workflows) that every service repository (React `frontend/`, Spring Boot
+`backend/`, Python `agent/`, ...) starts from. Kept in one repo so updates propagate to
+every service instead of being copy-pasted and drifting out of sync.
+
+This repo itself also dogfoods Spec-Kit for its own governance (see
+`.specify/specs/how2prompt-mvp/`, `.specify/memory/constitution.md`, `docs/`) — that
+content is this repo's own example/tracking data, **not** part of the shared surface
+synced into other services (see below).
+
+---
+
+## Quick Start
+
+For a service repo (`frontend/`, `backend/`, `agent/`, ...) that doesn't have this
+tooling yet:
+
+```bash
+# 1. Install the Spec-Kit CLI (once per machine)
+uv tool install specify-cli   # or: pipx install specify-cli
+specify version               # sanity check
+
+# 2. From the root of your service repo, add this repo as a submodule
+git submodule add <repository-url> how2prompt-agentic
+
+# 3. Copy the shared skills/commands/templates into your service repo
+bash how2prompt-agentic/scripts/sync.sh
+
+# 4. Create your service's own constitution and first feature spec
+#    (run inside your AI assistant, e.g. Claude Code / Cursor / OpenCode)
+/speckit.constitution
+/speckit.specify "describe the feature"
+```
+
+If you're cloning a service repo that **already** has this submodule:
+
+```bash
+git submodule update --init --recursive   # pull the submodule's content
+bash how2prompt-agentic/scripts/sync.sh   # re-sync into your local .claude/.cursor/.opencode/.specify
+```
+
+To pick up updates published to this repo later:
+
+```bash
+git submodule update --remote --merge how2prompt-agentic
+bash how2prompt-agentic/scripts/sync.sh
+git add .claude .cursor .opencode .specify how2prompt-agentic
+git commit -m "chore: update how2prompt-agentic shared tooling"
+```
+
+See section 1 below for the full rationale (why copy instead of symlink), section 3 for
+the full slash-command reference, and section 4 for what's synced vs. local-only.
+
+The submodule + sync mechanism is identical for every service, regardless of stack —
+only the constitution/spec content you write in step 4 differs, since it should reflect
+that service's own architecture (React vs. Spring Boot vs. Python, etc.).
+
+### Example: integrating into `how2prompt-ui` (frontend)
+
+```bash
+# From the root of how2prompt-ui (where package.json lives):
+
+# 1. Install the Spec-Kit CLI (once per machine)
+uv tool install specify-cli   # or: pipx install specify-cli
+specify version
+
+# 2. Add this repo as a submodule
+git submodule add https://github.com/GIF-NTG/how2prompt-agentic.git how2prompt-agentic
+
+# 3. Sync the shared skills/commands/templates into how2prompt-ui
+bash how2prompt-agentic/scripts/sync.sh
+
+# 4. Inside your AI assistant, create how2prompt-ui's OWN constitution and spec
+#    (this writes to how2prompt-ui's .specify/memory and .specify/specs, never
+#    into the how2prompt-agentic submodule itself)
+#    /speckit.constitution
+#    /speckit.specify "describe the frontend feature"
+
+# 5. Commit the submodule pointer and the synced (generated, non-symlinked) files
+git add .gitmodules how2prompt-agentic .claude .cursor .opencode .specify
+git commit -m "chore: integrate how2prompt-agentic shared Spec-Kit tooling"
+```
+
+### Example: integrating into `how2prompt-api` (backend)
+
+```bash
+# From the root of how2prompt-api (where pom.xml lives):
+
+# 1. Install the Spec-Kit CLI (once per machine)
+uv tool install specify-cli   # or: pipx install specify-cli
+specify version
+
+# 2. Add this repo as a submodule
+git submodule add https://github.com/GIF-NTG/how2prompt-agentic.git how2prompt-agentic
+
+# 3. Sync the shared skills/commands/templates into how2prompt-api
+bash how2prompt-agentic/scripts/sync.sh
+
+# 4. Inside your AI assistant, create how2prompt-api's OWN constitution and spec
+#    (writes to how2prompt-api's .specify/memory and .specify/specs, reflecting its
+#    own Java/Spring Boot architecture — never into the how2prompt-agentic submodule)
+#    /speckit.constitution
+#    /speckit.specify "describe the backend feature"
+
+# 5. Commit the submodule pointer and the synced (generated, non-symlinked) files
+git add .gitmodules how2prompt-agentic .claude .cursor .opencode .specify
+git commit -m "chore: integrate how2prompt-agentic shared Spec-Kit tooling"
+```
+
+Later, to pick up updates published to `how2prompt-agentic` (same for either repo):
+```bash
+git submodule update --remote --merge how2prompt-agentic
+bash how2prompt-agentic/scripts/sync.sh
+git add how2prompt-agentic .claude .cursor .opencode .specify
+git commit -m "chore: update how2prompt-agentic shared tooling"
+```
+
+### Tracking a non-default branch (e.g. an unmerged feature branch)
+
+To try out changes before they land on `main`, point the submodule at a specific
+branch instead:
+```bash
+git submodule add -b truonglong https://github.com/GIF-NTG/how2prompt-agentic.git how2prompt-agentic
+```
+
+If the submodule already exists and you just want to switch which branch it tracks:
+```bash
+git submodule set-branch -b truonglong how2prompt-agentic
+git submodule update --remote how2prompt-agentic
+```
+
+Once that branch merges into `main`, switch back with `git submodule set-branch -b main how2prompt-agentic`.
 
 ---
 
 ## 1. Git Submodule Integration
 
-This repository is designed to be integrated as a Git submodule or subdirectory inside the **root directory of a specific service/component repository** (such as your React `frontend/` repository or Spring Boot `backend/` repository). 
+This repository is designed to be integrated as a Git submodule inside the **root
+directory of a specific service/component repository** (such as your React `frontend/`
+repository or Spring Boot `backend/` repository).
 
-Integrating it this way enables your AI coding assistant (Claude Code, Cursor, OpenCode) to access Spec-Kit specifications and commands directly from the workspace root of that specific service.
+Integrating it this way enables your AI coding assistant (Claude Code, Cursor, OpenCode)
+to access Spec-Kit specifications and commands directly from the workspace root of that
+specific service.
 
 ### Add this Submodule to your Service Repository
 To add this project inside your frontend/backend repository root:
@@ -29,25 +165,32 @@ To pull the latest updates for this subsystem within your project:
 git submodule update --remote --merge
 ```
 
-### Link Spec-Kit to the Repository Root (Post-Clone Setup)
-Once you have cloned the submodule parallel to or inside your service repository (e.g. `how2prompt-api/` or `how2prompt-ui/`), you must open your terminal **at the root of your service repository** and run the setup script using its relative path to enable the Spec-Kit commands/skills in your editor instantly:
+### Sync Spec-Kit Tooling to the Repository Root (Post-Clone Setup)
+Once you have cloned the submodule inside your service repository (e.g. `backend/` or
+`frontend/`), run the sync script **from the root of your service repository**:
 
 ```bash
-# Open terminal at your service repository root (e.g. how2prompt-api/ or how2prompt-ui/)
-cd /path/to/your/service-repo
-
-# If how2prompt-agentic is parallel to your service repository:
-bash ../how2prompt-agentic/setup.sh
-
-# If how2prompt-agentic is inside your service repository:
-bash how2prompt-agentic/setup.sh
+# Run this from the root of your frontend or backend repository
+bash how2prompt-agentic/scripts/sync.sh
 ```
 
-This script dynamically resolves the absolute path of the submodule and will automatically:
-- Symlink the `.specify/` configuration and feature specs directory to the repository root.
-- Symlink all Spec-Kit integration skills to `.claude/skills/` (for Claude Code).
-- Symlink all Spec-Kit integration skills to `.cursor/skills/` (for Cursor).
-- Symlink all Spec-Kit integration commands to `.opencode/commands/` (for OpenCode).
+This script **copies** (never symlinks) the generic, cross-project tooling into your
+own service repo:
+- Spec-Kit integration skills into `.claude/skills/` (for Claude Code).
+- Spec-Kit integration skills into `.cursor/skills/` (for Cursor).
+- Spec-Kit integration commands into `.opencode/commands/` (for OpenCode).
+- The Spec-Kit CLI scripts, base templates, and workflows into `.specify/`.
+
+It deliberately does **not** touch `.specify/agents`, `.specify/memory`,
+`.specify/specs`, or `.specify/templates/overrides` — those hold project-specific
+constitution/spec content. Symlinking or copying them would make every service that
+submodules this repo share (and clobber) the same spec state. Run `specify init` or
+`/speckit.constitution` / `/speckit.specify` **in your own service repo** to create your
+own `.specify/memory/constitution.md` and `.specify/specs/`.
+
+The copies under `.claude/skills/`, `.cursor/skills/`, `.opencode/commands/`, and
+`.specify/{scripts,templates,workflows}/` are generated — don't hand-edit them. Edit the
+source in `how2prompt-agentic/` and re-run `sync.sh`.
 
 ---
 
@@ -105,37 +248,27 @@ Spec-Kit specifications and configuration files are organized inside the hidden 
 
 ```text
 how2prompt-agentic/
-├── .claude/skills/            # Integration skills for Claude Code
-├── .cursor/skills/            # Integration skills for Cursor
-├── .opencode/commands/        # Markdown integration commands for OpenCode
+├── .claude/skills/            # [synced] Integration skills for Claude Code
+├── .cursor/skills/            # [synced] Integration skills for Cursor
+├── .opencode/commands/        # [synced] Markdown integration commands for OpenCode
+├── scripts/
+│   └── sync.sh                # Copies the [synced] items above into a consuming repo
 ├── .specify/
-│   ├── integration.json       # Configured/installed integrations metadata
-│   ├── init-options.json      # Initialization CLI parameters log
+│   ├── scripts/                # [synced] Spec-Kit CLI helper scripts
+│   ├── templates/               # [synced, top-level only] base spec/plan/tasks templates
+│   │   └── overrides/           # [local-only] this repo's own customized templates
+│   ├── workflows/                # [synced] workflow definitions
+│   ├── integration.json         # [local-only] installed-integrations state for this repo
+│   ├── init-options.json        # [local-only] `specify init` parameters used for this repo
+│   ├── agents/                   # [local-only] this repo's own agent role docs
 │   ├── memory/
-│   │   └── constitution.md    # Project Constitution (architectural source of truth)
-│   ├── templates/
-│   │   └── overrides/         # Customized plan and tasks templates
+│   │   └── constitution.md      # [local-only] this repo's own governing constitution
 │   └── specs/
-│       └── how2prompt-mvp/    # Business spec, plan, and tasks for the MVP feature
-│           ├── spec.md        # Feature requirements & acceptance criteria (Given-When-Then)
-│           ├── plan.md        # Technical execution and architecture plan
-│           └── tasks.md       # Checklist of modular implementation tasks
+│       └── how2prompt-mvp/      # [local-only] this repo's own example feature spec
 ```
 
----
-
-## 5. Multi-Root Workspace Configuration (Code Workspace)
-
-To facilitate developing the parent project **how2prompt** and the **how2prompt-agentic** submodule concurrently, open the workspace file at the parent repository root:
-
-*   **File Path:** `how2prompt.code-workspace`
-*   This workspace groups both directories and configures file exclusions to hide hidden metadata folders.
-
----
-
-## 6. Requirements (Local execution)
-* Python ^3.11
-* Poetry ^1.8
+`[synced]` = copied into other repos by `scripts/sync.sh`. `[local-only]` = specific to
+this repo's own use of Spec-Kit; never copied elsewhere.
 
 ---
 *Developed by Spec Kit & How2Prompt Team.*
