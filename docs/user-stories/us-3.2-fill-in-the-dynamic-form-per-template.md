@@ -18,14 +18,19 @@
 
 ## Technical Implementation Details
 - **Frontend Layer**:
-  - Dynamic form rendering based on `template_variables` JSONB configuration.
-  - Real-time client-side prompt preview via React state.
+  - Dynamic form rendering based on `template_variables` JSONB: `input_type` determines field component (text, textarea, select, multiselect, number, boolean, slider, etc.).
+  - Labels, placeholders, and help text pulled from JSONB i18n data based on current locale.
+  - Client-side validation per variable configuration: `min`, `max`, `regex`, `minLength`, `is_required`.
+  - Generate button disabled until all required fields pass validation.
 - **Backend Layer**:
-  - Rendering engine for final prompt compilation (source of truth).
-  - Payload sanitization to prevent injection.
+  - Re-validates all inputs server-side (frontend is never trusted).
+  - `template_variables` configuration served via `GET /api/v1/templates/{id}`.
+- **Database Layer**:
+  - `template_variables` table with JSONB columns for `options`, `validation`, `label` (i18n).
 
 ## Verification & Testing
-- Select a template and verify dynamic fields appear.
-- Type in fields and watch the real-time preview update.
-- Click Generate and verify the backend response matches the preview.
-- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [epics-and-stories.md](../epics-and-stories.md) for full system specifications.
+- Select a template → verify correct field types render (text, textarea, select, etc.).
+- Test validation: leave required field empty → Generate button stays disabled.
+- Test regex validation → verify inline error message from `validation.message_i18n`.
+- Switch locale → verify labels and placeholders update to the selected language.
+- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [use-cases.md](../use-cases.md) for full system specifications.

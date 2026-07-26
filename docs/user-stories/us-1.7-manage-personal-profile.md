@@ -18,16 +18,21 @@
 
 ## Technical Implementation Details
 - **Frontend Layer**:
-  - React Hook Form for validation.
-  - JWT token storage (access in memory, refresh in httpOnly cookie).
+  - Profile settings page at `/settings/profile`.
+  - React Hook Form for field validation.
+  - Image upload component (accepts png/jpg, max 2MB).
+  - Locale change triggers immediate i18n update via i18next.
 - **Backend Layer**:
-  - Spring Boot Gateway for auth endpoints.
-  - BCrypt password hashing.
+  - `GET /api/v1/users/me` to load current profile data.
+  - `PATCH /api/v1/users/me` to save changes.
+  - Validates: unique username, image size <= 2MB, image format (png/jpg).
+  - Avatar uploaded to S3/MinIO.
 - **Database Layer**:
-  - PostgreSQL `users` and `workspaces` tables.
+  - Update `users` table (`full_name`, `avatar_url`, `bio`, `username`, `locale`, `timezone`).
 
 ## Verification & Testing
-- Navigate to the relevant auth page.
-- Submit valid and invalid data to observe success redirects and error states.
-- Check browser cookies for refresh token.
-- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [epics-and-stories.md](../epics-and-stories.md) for full system specifications.
+- Update profile fields (full name, bio, timezone) → verify saved and displayed correctly.
+- Try duplicate username → expect `409 Conflict` with suggestion.
+- Upload avatar > 2MB → expect `413 Payload Too Large`.
+- Change locale from EN to VI → verify UI language switches immediately.
+- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [use-cases.md](../use-cases.md) for full system specifications.

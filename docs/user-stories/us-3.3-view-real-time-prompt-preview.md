@@ -17,14 +17,17 @@
 
 ## Technical Implementation Details
 - **Frontend Layer**:
-  - Dynamic form rendering based on `template_variables` JSONB configuration.
-  - Real-time client-side prompt preview via React state.
+  - Client-side Template Renderer runs on every field `onChange` event.
+  - Replaces `{{placeholder}}` with current value; shows placeholder styling for unfilled variables.
+  - Monospace display with syntax highlighting for unfilled placeholders.
+  - Character count and token estimate (using `tiktoken` library or heuristic).
+  - Preview render target: < 50ms.
 - **Backend Layer**:
-  - Rendering engine for final prompt compilation (source of truth).
-  - Payload sanitization to prevent injection.
+  - N/A — the preview is client-side only. The final prompt is always re-rendered by the backend (US-3.6) at generation time.
 
 ## Verification & Testing
-- Select a template and verify dynamic fields appear.
-- Type in fields and watch the real-time preview update.
-- Click Generate and verify the backend response matches the preview.
-- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [epics-and-stories.md](../epics-and-stories.md) for full system specifications.
+- Type in form fields → verify preview updates in real-time on every keystroke.
+- Verify unfilled placeholders are visually distinct (highlighted/styled differently).
+- Measure preview render time → must be < 50ms.
+- Verify character count and token estimate update as text changes.
+- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [use-cases.md](../use-cases.md) for full system specifications.

@@ -17,15 +17,21 @@
 
 ## Technical Implementation Details
 - **Frontend Layer**:
-  - Protected admin routes using Higher Order Components (HOC).
-  - Data tables for CRUD operations.
+  - Protected admin route at `/admin/ai-models` (requires `is_admin = true`).
+  - Data table with CRUD forms for model management.
+  - Fields: `code`, `name`, `provider`, `model_type`, `capabilities` (JSONB), `default_config`, `icon`, `is_active`, `sort_order`.
 - **Backend Layer**:
-  - Role-based authorization (`hasRole('ADMIN')`).
+  - `GET /api/v1/admin/ai-models` — list all models (including inactive).
+  - `POST /api/v1/admin/ai-models` — create new model.
+  - `PATCH /api/v1/admin/ai-models/{id}` — update model.
+  - Role-based authorization: `hasRole('ADMIN')`.
 - **Database Layer**:
-  - CRUD operations on taxonomy and model tables.
+  - CRUD operations on `ai_models` table.
+  - Cannot delete a model if templates reference it — must deactivate (`is_active=false`) instead.
 
 ## Verification & Testing
-- Log in as an Admin and navigate to the admin dashboard.
-- Create or edit an entity and verify changes reflect in the database.
-- Attempt to access admin routes as a normal user and verify 403 Forbidden.
-- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [epics-and-stories.md](../epics-and-stories.md) for full system specifications.
+- Log in as Admin → navigate to `/admin/ai-models` → CRUD a model.
+- Verify model changes reflected in model selection dropdowns across the app.
+- Try deleting a model with attached templates → verify blocked; must deactivate instead.
+- Access `/admin/ai-models` as a normal user → expect `403 Forbidden`.
+- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [use-cases.md](../use-cases.md) for full system specifications.

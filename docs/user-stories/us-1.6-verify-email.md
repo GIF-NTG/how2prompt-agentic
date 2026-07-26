@@ -18,16 +18,19 @@
 
 ## Technical Implementation Details
 - **Frontend Layer**:
-  - React Hook Form for validation.
-  - JWT token storage (access in memory, refresh in httpOnly cookie).
+  - Handle verification link redirect; display success message.
+  - Verification reminder banner on home page (dismisses after verification).
+  - "Resend verification email" button on the banner.
 - **Backend Layer**:
-  - Spring Boot Gateway for auth endpoints.
-  - BCrypt password hashing.
+  - `GET /api/v1/auth/verify-email?token=...` endpoint.
+  - Update `users.email_verified_at = NOW()` upon valid token.
+  - Resend rate limit: once per 5 minutes per user.
 - **Database Layer**:
-  - PostgreSQL `users` and `workspaces` tables.
+  - Update `users` table (`email_verified_at` column).
 
 ## Verification & Testing
-- Navigate to the relevant auth page.
-- Submit valid and invalid data to observe success redirects and error states.
-- Check browser cookies for refresh token.
-- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [epics-and-stories.md](../epics-and-stories.md) for full system specifications.
+- Click verification link in email → verify `email_verified_at` is set, banner disappears.
+- Try expired or invalid token → verify error message displayed.
+- Click "Resend" within 5 minutes → verify rate limit enforced.
+- Verify unverified users can still use the app but with restrictions (no public templates, no AI Refine).
+- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [use-cases.md](../use-cases.md) for full system specifications.

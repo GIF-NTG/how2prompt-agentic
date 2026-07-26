@@ -18,16 +18,19 @@
 
 ## Technical Implementation Details
 - **Frontend Layer**:
-  - React Query for data fetching and caching.
-  - Debounced input for full-text search.
+  - Template detail page with sections: description, example output, usage guide, variable list, supported models.
+  - Action buttons: `[Use template]`, `[Favorite]`, `[Fork]` (Phase 2).
+  - React Query for data fetching with cache.
 - **Backend Layer**:
-  - Spring Data JPA with pagination.
-  - Redis caching for featured/trending endpoints.
+  - `GET /api/v1/templates/{id}` endpoint.
+  - Returns: template info, `current_version` (prompt_body, guide), `template_variables`, `template_variants` by model, author info, usage/favorite counts, favorite status (if logged in).
+  - Increments `view_count` asynchronously (non-blocking).
 - **Database Layer**:
-  - PostgreSQL `tsvector` and `pg_trgm` for search indexing.
+  - Joins: `templates`, `template_versions`, `template_variables`, `template_variants`, `ai_models`.
 
 ## Verification & Testing
-- Visit the explore page to ensure templates render.
-- Apply filters and verify the URL query string updates.
-- Perform a search and verify latency < 200ms.
-- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [epics-and-stories.md](../epics-and-stories.md) for full system specifications.
+- Click a template card → verify detail page renders all sections correctly.
+- Verify `view_count` increments after page load.
+- Access a non-existent template → expect `404 Not Found`.
+- Access a private template from another workspace → expect `403 Forbidden`.
+- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [use-cases.md](../use-cases.md) for full system specifications.

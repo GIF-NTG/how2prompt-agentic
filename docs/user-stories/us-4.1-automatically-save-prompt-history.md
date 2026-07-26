@@ -17,15 +17,17 @@
 
 ## Technical Implementation Details
 - **Frontend Layer**:
-  - History drawer/page with pagination.
-  - React Context to track favorite states.
+  - N/A — this is a system-level operation triggered automatically after prompt generation.
 - **Backend Layer**:
-  - Asynchronous saving to history via `@Transactional` methods.
+  - Within the same `@Transactional` block as UC-03.06 (backend render), creates a `generated_prompts` record.
+  - Saves: `user_id`, `workspace_id`, `template_id`, `template_version_id`, `ai_model_id`, `input_values` (JSONB), `extra_instructions`, `final_prompt`.
+  - Does not block the generation response — runs within the same transaction for consistency.
 - **Database Layer**:
-  - PostgreSQL `generated_prompts` and `favorites` tables.
+  - Insert into `generated_prompts` table.
+  - Soft-delete via `deleted_at` column (records are never hard-deleted).
 
 ## Verification & Testing
-- Generate a prompt and check if it appears in the history list.
-- Click 'Re-run' to ensure old variables are loaded.
-- Click favorite icon and verify state persists.
-- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [epics-and-stories.md](../epics-and-stories.md) for full system specifications.
+- Generate a prompt → verify a `generated_prompts` record is created with all correct fields.
+- Verify `input_values` JSONB matches what was submitted in the form.
+- Verify soft-delete: deleted records retain `deleted_at` timestamp, not physically removed.
+- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [use-cases.md](../use-cases.md) for full system specifications.

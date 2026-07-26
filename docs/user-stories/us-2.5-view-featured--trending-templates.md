@@ -18,16 +18,18 @@
 
 ## Technical Implementation Details
 - **Frontend Layer**:
-  - React Query for data fetching and caching.
-  - Debounced input for full-text search.
+  - Two separate carousels on the homepage: Featured and Trending.
+  - React Query for fetching with stale-while-revalidate pattern.
 - **Backend Layer**:
-  - Spring Data JPA with pagination.
-  - Redis caching for featured/trending endpoints.
+  - `GET /api/v1/templates/featured` — returns templates where `featured_at IS NOT NULL`, sorted by `featured_at DESC`.
+  - `GET /api/v1/templates/trending?window=7d` — returns templates ranked by `usage_count` over the last 7 days.
+  - Both endpoints cached in Redis for 10 minutes to reduce database load.
 - **Database Layer**:
-  - PostgreSQL `tsvector` and `pg_trgm` for search indexing.
+  - `templates.featured_at` column for admin-curated featured templates.
+  - Aggregate `usage_count` over 7-day window for trending calculation.
 
 ## Verification & Testing
-- Visit the explore page to ensure templates render.
-- Apply filters and verify the URL query string updates.
-- Perform a search and verify latency < 200ms.
-- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [epics-and-stories.md](../epics-and-stories.md) for full system specifications.
+- Visit homepage → verify Featured and Trending carousels render separately.
+- Mark a template as featured (admin) → verify it appears in the Featured carousel.
+- Verify cache: data stays consistent for 10 minutes even after new template activity.
+- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [use-cases.md](../use-cases.md) for full system specifications.

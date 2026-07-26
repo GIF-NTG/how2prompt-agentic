@@ -18,15 +18,19 @@
 ## Technical Implementation Details
 - **Frontend Layer**:
   - React Query for data fetching and caching.
-  - Debounced input for full-text search.
+  - Grid layout with infinite scroll or load-more button.
+  - Template cards showing: title, cover image, category, `upvote_count`, `usage_count`, author.
 - **Backend Layer**:
-  - Spring Data JPA with pagination.
-  - Redis caching for featured/trending endpoints.
+  - `GET /api/v1/templates?sort=popular&limit=20` endpoint.
+  - Filter: `status='published' AND is_public=true` (for guests); include user's workspace templates if logged in.
+  - Templates with `is_official=true` prioritized at the top under default sort.
 - **Database Layer**:
-  - PostgreSQL `tsvector` and `pg_trgm` for search indexing.
+  - Query `templates` table with cursor-based pagination.
+  - Exclude records where `deleted_at IS NOT NULL`.
 
 ## Verification & Testing
-- Visit the explore page to ensure templates render.
-- Apply filters and verify the URL query string updates.
-- Perform a search and verify latency < 200ms.
-- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [epics-and-stories.md](../epics-and-stories.md) for full system specifications.
+- Visit `/explore` → verify template grid renders with cards showing correct metadata.
+- Verify official templates (`is_official=true`) appear at the top.
+- Verify soft-deleted templates are not displayed.
+- Test infinite scroll / load-more pagination.
+- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [use-cases.md](../use-cases.md) for full system specifications.

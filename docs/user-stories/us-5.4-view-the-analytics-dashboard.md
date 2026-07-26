@@ -17,15 +17,19 @@
 
 ## Technical Implementation Details
 - **Frontend Layer**:
-  - Protected admin routes using Higher Order Components (HOC).
-  - Data tables for CRUD operations.
+  - Protected admin route at `/admin/dashboard` (requires `is_admin = true`).
+  - Charts (line, bar, pie) and data tables for metrics visualization.
+  - Date range filter for custom time periods.
 - **Backend Layer**:
-  - Role-based authorization (`hasRole('ADMIN')`).
+  - Aggregated queries returning: DAU/WAU/MAU, prompts generated per day, most popular templates, most-used AI models, signup → first-generate conversion funnel.
+  - Results cached for 5 minutes to reduce database load.
+  - Role-based authorization: `hasRole('ADMIN')`.
 - **Database Layer**:
-  - CRUD operations on taxonomy and model tables.
+  - Aggregate queries across `users`, `generated_prompts`, `templates`, `ai_models` tables.
 
 ## Verification & Testing
-- Log in as an Admin and navigate to the admin dashboard.
-- Create or edit an entity and verify changes reflect in the database.
-- Attempt to access admin routes as a normal user and verify 403 Forbidden.
-- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [epics-and-stories.md](../epics-and-stories.md) for full system specifications.
+- Navigate to `/admin/dashboard` → verify metrics and charts render correctly.
+- Apply a date range filter → verify data updates to match the selected period.
+- Verify cache behavior: data stays consistent for 5 minutes.
+- Access `/admin/dashboard` as a normal user → expect `403 Forbidden`.
+- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [use-cases.md](../use-cases.md) for full system specifications.

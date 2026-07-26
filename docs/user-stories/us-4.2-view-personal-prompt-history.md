@@ -17,15 +17,20 @@
 
 ## Technical Implementation Details
 - **Frontend Layer**:
-  - History drawer/page with pagination.
-  - React Context to track favorite states.
+  - History page at `/history` with list/card view.
+  - Cursor-based pagination (load-more or infinite scroll).
+  - Filters: by template, AI model, and date range.
+  - React Query for data fetching and caching.
 - **Backend Layer**:
-  - Asynchronous saving to history via `@Transactional` methods.
+  - `GET /api/v1/generated-prompts?limit=20&cursor=...` endpoint.
+  - Sorted by `created_at DESC`; filters by `template_id`, `ai_model_id`, date range.
+  - Returns list with snippet of `final_prompt` and template thumbnail.
 - **Database Layer**:
-  - PostgreSQL `generated_prompts` and `favorites` tables.
+  - Query `generated_prompts` table filtered by `user_id`, `deleted_at IS NULL`.
+  - Composite index on `(user_id, created_at DESC)` for fast retrieval.
 
 ## Verification & Testing
-- Generate a prompt and check if it appears in the history list.
-- Click 'Re-run' to ensure old variables are loaded.
-- Click favorite icon and verify state persists.
-- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [epics-and-stories.md](../epics-and-stories.md) for full system specifications.
+- Navigate to `/history` → verify generated prompts listed in reverse chronological order.
+- Test filters: filter by template → verify only matching history shown.
+- Test cursor-based pagination → verify next page loads correctly.
+- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [use-cases.md](../use-cases.md) for full system specifications.

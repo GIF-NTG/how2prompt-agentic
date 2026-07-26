@@ -17,14 +17,22 @@
 
 ## Technical Implementation Details
 - **Frontend Layer**:
-  - Dynamic form rendering based on `template_variables` JSONB configuration.
-  - Real-time client-side prompt preview via React state.
+  - N/A — this is a system-level backend operation.
 - **Backend Layer**:
-  - Rendering engine for final prompt compilation (source of truth).
-  - Payload sanitization to prevent injection.
+  - Render engine (Mustache/Handlebars-style): `{{var_key}}` → `input_values[var_key]`.
+  - Load `template_versions` and `template_variants`; select `prompt_body_override` if variant exists, otherwise use `version.prompt_body`.
+  - Handle `default_value`: if input is empty and default exists → use default; if optional and empty → remove placeholder + trim whitespace.
+  - Append `extra_instructions` per UC-03.04 rules.
+  - Sanitize output (remove unusual control characters).
+  - Re-validate all inputs server-side (required, regex) — frontend is never trusted.
+  - Renderer is a separate service with >= 90% unit test coverage.
+- **Database Layer**:
+  - Read: `template_versions`, `template_variants`. Write: `generated_prompts` with `final_prompt`, `input_values` (JSONB), `workspace_id`, `ai_model_id`, `template_version_id`.
 
 ## Verification & Testing
-- Select a template and verify dynamic fields appear.
-- Type in fields and watch the real-time preview update.
-- Click Generate and verify the backend response matches the preview.
-- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [epics-and-stories.md](../epics-and-stories.md) for full system specifications.
+- Verify backend render matches frontend preview for identical inputs.
+- Test with all variable types (text, select, multiselect, boolean, etc.).
+- Test default values: leave a field with a default empty → verify default is used.
+- Test empty optional variables → verify placeholder is removed and whitespace is trimmed.
+- Verify renderer unit test coverage >= 90%.
+- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [use-cases.md](../use-cases.md) for full system specifications.

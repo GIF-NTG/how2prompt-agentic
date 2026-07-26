@@ -17,16 +17,19 @@
 
 ## Technical Implementation Details
 - **Frontend Layer**:
-  - React Hook Form for validation.
-  - JWT token storage (access in memory, refresh in httpOnly cookie).
+  - Forgot password form (email input) and reset password page (new password + confirm).
+  - React Hook Form for password strength validation.
 - **Backend Layer**:
-  - Spring Boot Gateway for auth endpoints.
-  - BCrypt password hashing.
+  - `POST /api/v1/auth/forgot-password`: generate reset token (1h validity), send email via SendGrid/Resend.
+  - `POST /api/v1/auth/reset-password`: verify token, update `password_hash` (BCrypt, cost >= 12), revoke all old refresh tokens, send confirmation email.
+  - Anti-enumeration: returns `200 OK` even if email doesn't exist.
 - **Database Layer**:
-  - PostgreSQL `users` and `workspaces` tables.
+  - Update `users.password_hash`; bulk-revoke in `refresh_tokens` table.
 
 ## Verification & Testing
-- Navigate to the relevant auth page.
-- Submit valid and invalid data to observe success redirects and error states.
-- Check browser cookies for refresh token.
-- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [epics-and-stories.md](../epics-and-stories.md) for full system specifications.
+- Submit forgot password form → verify email received with reset link.
+- Click reset link → set new password → verify redirected to login and can log in with new password.
+- Try expired or already-used reset token → expect `410 Gone`.
+- Submit non-existent email → verify still returns `200 OK` (no enumeration).
+- After reset, verify all previous sessions (refresh tokens) are revoked.
+- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [use-cases.md](../use-cases.md) for full system specifications.

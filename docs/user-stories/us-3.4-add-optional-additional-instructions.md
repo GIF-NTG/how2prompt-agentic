@@ -17,14 +17,17 @@
 
 ## Technical Implementation Details
 - **Frontend Layer**:
-  - Dynamic form rendering based on `template_variables` JSONB configuration.
-  - Real-time client-side prompt preview via React state.
+  - "Additional instructions (optional)" textarea rendered at the bottom of the dynamic form.
+  - Content appended to real-time preview as user types.
 - **Backend Layer**:
-  - Rendering engine for final prompt compilation (source of truth).
-  - Payload sanitization to prevent injection.
+  - Appends `extra_instructions` to the end of `prompt_body` after a newline.
+  - If the template declares a `{{__extra__}}` placeholder, the content is inserted at that specific location instead.
+  - Content is escaped to guard against basic prompt injection.
+- **Database Layer**:
+  - `extra_instructions` stored as part of `generated_prompts.extra_instructions` column.
 
 ## Verification & Testing
-- Select a template and verify dynamic fields appear.
-- Type in fields and watch the real-time preview update.
-- Click Generate and verify the backend response matches the preview.
-- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [epics-and-stories.md](../epics-and-stories.md) for full system specifications.
+- Type additional instructions → verify they appear in the preview appended at the end.
+- Test with a template that uses `{{__extra__}}` placeholder → verify instructions are inserted at the correct location.
+- Attempt to inject prompt manipulation characters → verify content is escaped.
+- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [use-cases.md](../use-cases.md) for full system specifications.

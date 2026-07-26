@@ -17,15 +17,21 @@
 
 ## Technical Implementation Details
 - **Frontend Layer**:
-  - Protected admin routes using Higher Order Components (HOC).
-  - Data tables for CRUD operations.
+  - Protected admin route at `/admin/taxonomy` (requires `is_admin = true`).
+  - Tree view for nested categories; flat list/tag cloud for tags.
+  - Tag merge UI: select duplicates and merge into one.
 - **Backend Layer**:
-  - Role-based authorization (`hasRole('ADMIN')`).
+  - `GET/POST/PATCH/DELETE /api/v1/admin/taxonomy` endpoints.
+  - Category nesting via `parent_id`.
+  - Tag merge: combines duplicate tags (e.g., "email" + "emails") and updates `usage_count`.
+  - Role-based authorization: `hasRole('ADMIN')`.
 - **Database Layer**:
-  - CRUD operations on taxonomy and model tables.
+  - `categories` table with `parent_id` for nesting.
+  - `tags` table with `usage_count`.
 
 ## Verification & Testing
-- Log in as an Admin and navigate to the admin dashboard.
-- Create or edit an entity and verify changes reflect in the database.
-- Attempt to access admin routes as a normal user and verify 403 Forbidden.
-- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [epics-and-stories.md](../epics-and-stories.md) for full system specifications.
+- Create a nested category → verify it appears correctly in the browse sidebar.
+- Merge duplicate tags → verify `usage_count` is summed and old tag is removed.
+- Verify taxonomy changes reflected in template filter controls.
+- Access `/admin/taxonomy` as a normal user → expect `403 Forbidden`.
+- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [use-cases.md](../use-cases.md) for full system specifications.

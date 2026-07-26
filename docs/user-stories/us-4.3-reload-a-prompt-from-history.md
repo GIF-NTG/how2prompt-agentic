@@ -17,15 +17,18 @@
 
 ## Technical Implementation Details
 - **Frontend Layer**:
-  - History drawer/page with pagination.
-  - React Context to track favorite states.
+  - "Re-run" button on history items navigates to the Generate page.
+  - Pre-fills dynamic form with old `input_values` and model selection from history record.
+  - Clicking Generate creates a new record (does not overwrite the old one).
 - **Backend Layer**:
-  - Asynchronous saving to history via `@Transactional` methods.
+  - `GET /api/v1/generated-prompts/{id}` returns full `input_values` (JSONB) for form pre-population.
+  - Handles edge cases: deleted template (returns warning), newer template version available (returns version badge).
 - **Database Layer**:
-  - PostgreSQL `generated_prompts` and `favorites` tables.
+  - Read from `generated_prompts` table; join with `templates` and `template_versions` to check availability.
 
 ## Verification & Testing
-- Generate a prompt and check if it appears in the history list.
-- Click 'Re-run' to ensure old variables are loaded.
-- Click favorite icon and verify state persists.
-- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [epics-and-stories.md](../epics-and-stories.md) for full system specifications.
+- Click "Re-run" on a history item → verify Generate form pre-filled with original values.
+- Edit fields and generate → verify a **new** record is created (old one preserved).
+- Test with a deleted template → verify warning message, only "Copy" allowed, no form reload.
+- Test with a template that has a newer version → verify badge "This used v1, v2 is now available".
+- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [use-cases.md](../use-cases.md) for full system specifications.

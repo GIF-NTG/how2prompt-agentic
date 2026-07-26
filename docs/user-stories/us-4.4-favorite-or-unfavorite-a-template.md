@@ -18,15 +18,21 @@
 
 ## Technical Implementation Details
 - **Frontend Layer**:
-  - History drawer/page with pagination.
-  - React Context to track favorite states.
+  - Heart icon toggle on template cards and detail pages.
+  - Zustand store tracks favorite states for optimistic UI updates.
+  - Toast notification on favorite/unfavorite action.
 - **Backend Layer**:
-  - Asynchronous saving to history via `@Transactional` methods.
+  - `POST /api/v1/templates/{id}/favorite` to add favorite.
+  - `DELETE /api/v1/templates/{id}/favorite` to remove favorite.
+  - Increments/decrements `templates.favorite_count` on toggle.
 - **Database Layer**:
-  - PostgreSQL `generated_prompts` and `favorites` tables.
+  - Insert/delete in `favorites` table (`user_id`, `template_id`).
+  - Update `templates.favorite_count` counter.
 
 ## Verification & Testing
-- Generate a prompt and check if it appears in the history list.
-- Click 'Re-run' to ensure old variables are loaded.
-- Click favorite icon and verify state persists.
-- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [epics-and-stories.md](../epics-and-stories.md) for full system specifications.
+- Click heart icon on a template → verify icon toggles filled/unfilled and toast appears.
+- Verify `favorites` table record created/deleted.
+- Verify `templates.favorite_count` increments/decrements correctly.
+- Navigate to `/favorites` → verify favorited templates are listed.
+- Unfavorite a template → verify it disappears from the favorites list.
+- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [use-cases.md](../use-cases.md) for full system specifications.

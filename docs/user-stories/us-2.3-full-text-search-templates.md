@@ -17,16 +17,23 @@
 
 ## Technical Implementation Details
 - **Frontend Layer**:
-  - React Query for data fetching and caching.
-  - Debounced input for full-text search.
+  - Debounced search input (300ms delay before sending request).
+  - Keyword highlighting in search results.
+  - React Query for caching search results.
 - **Backend Layer**:
-  - Spring Data JPA with pagination.
-  - Redis caching for featured/trending endpoints.
+  - `GET /api/v1/templates?q=...` endpoint.
+  - Primary search: `search_vector` column (`tsvector`) with `to_tsquery`.
+  - Fallback: `pg_trgm` for fuzzy matching when exact match returns few results.
+  - Ranking: `ts_rank + usage_count` for relevance ordering.
 - **Database Layer**:
-  - PostgreSQL `tsvector` and `pg_trgm` for search indexing.
+  - GIN index on `search_vector` (tsvector) column.
+  - `pg_trgm` extension for trigram-based fuzzy search.
+  - Supports both English and Vietnamese (using 'simple' dictionary).
 
 ## Verification & Testing
-- Visit the explore page to ensure templates render.
-- Apply filters and verify the URL query string updates.
-- Perform a search and verify latency < 200ms.
-- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [epics-and-stories.md](../epics-and-stories.md) for full system specifications.
+- Type a keyword (e.g., "email marketing") → verify results appear after debounce.
+- Verify search latency p95 < 200ms with 10K templates.
+- Test fuzzy search with typos → verify pg_trgm returns relevant results.
+- Test search in both English and Vietnamese.
+- Verify keyword highlighting in result titles/descriptions.
+- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [use-cases.md](../use-cases.md) for full system specifications.

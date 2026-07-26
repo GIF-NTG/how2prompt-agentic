@@ -18,16 +18,22 @@
 
 ## Technical Implementation Details
 - **Frontend Layer**:
-  - React Hook Form for validation.
-  - JWT token storage (access in memory, refresh in httpOnly cookie).
+  - React Hook Form for email/password validation.
+  - JWT token storage: access token in memory, refresh token in httpOnly cookie.
+  - Redirect to dashboard on success.
 - **Backend Layer**:
-  - Spring Boot Gateway for auth endpoints.
-  - BCrypt password hashing.
+  - `POST /api/v1/auth/login` endpoint.
+  - BCrypt credential verification against `password_hash`.
+  - Update `users.last_login_at`, create `refresh_tokens` record (30-day validity).
+  - Access token signed with RS256 (asymmetric), 15-minute validity.
+  - Refresh tokens rotate on each use.
+  - Brute force protection: 5 failed attempts in 15 min → CAPTCHA required.
 - **Database Layer**:
-  - PostgreSQL `users` and `workspaces` tables.
+  - Read from `users` table; insert into `refresh_tokens` table.
 
 ## Verification & Testing
-- Navigate to the relevant auth page.
-- Submit valid and invalid data to observe success redirects and error states.
-- Check browser cookies for refresh token.
-- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [epics-and-stories.md](../epics-and-stories.md) for full system specifications.
+- Login with valid credentials → redirected to dashboard; verify httpOnly cookie set.
+- Login with wrong email/password → expect `401 Unauthorized` (must not reveal which field is wrong).
+- Attempt 5 failed logins within 15 min → verify CAPTCHA lock triggers.
+- Verify access token expires after 15 min and auto-refreshes if refresh token is valid.
+- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [use-cases.md](../use-cases.md) for full system specifications.

@@ -17,14 +17,16 @@
 
 ## Technical Implementation Details
 - **Frontend Layer**:
-  - Dynamic form rendering based on `template_variables` JSONB configuration.
-  - Real-time client-side prompt preview via React state.
+  - Model selection dropdown populated from `template_models` (via `ai_models` table).
+  - Auto-select and hide dropdown if template supports only one model (marked `is_primary`).
+  - On model change: load corresponding `template_variants.prompt_body_override` if exists; otherwise use original `prompt_body`.
 - **Backend Layer**:
-  - Rendering engine for final prompt compilation (source of truth).
-  - Payload sanitization to prevent injection.
+  - Model data served via `GET /api/v1/templates/{id}` (includes variants per model).
+- **Database Layer**:
+  - `template_models`, `template_variants`, `ai_models` tables.
 
 ## Verification & Testing
-- Select a template and verify dynamic fields appear.
-- Type in fields and watch the real-time preview update.
-- Click Generate and verify the backend response matches the preview.
-- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [epics-and-stories.md](../epics-and-stories.md) for full system specifications.
+- Select a template with multiple models → verify dropdown shows all supported models.
+- Switch model → verify variant loads correctly (different prompt body if variant exists).
+- Template with single model → verify dropdown is hidden and model is auto-selected.
+- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [use-cases.md](../use-cases.md) for full system specifications.

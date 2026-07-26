@@ -17,15 +17,20 @@
 
 ## Technical Implementation Details
 - **Frontend Layer**:
-  - History drawer/page with pagination.
-  - React Context to track favorite states.
+  - Delete button (trash icon) on each history item.
+  - Confirmation dialog before deletion.
+  - Bulk-select with "Delete selected" option.
+  - Optimistic UI: item removed from list immediately.
 - **Backend Layer**:
-  - Asynchronous saving to history via `@Transactional` methods.
+  - `DELETE /api/v1/generated-prompts/{id}` endpoint.
+  - Sets `deleted_at = NOW()` (soft-delete, not hard-delete).
 - **Database Layer**:
-  - PostgreSQL `generated_prompts` and `favorites` tables.
+  - Update `generated_prompts.deleted_at` column.
+  - Soft-deleted records preserved for audit trail; restorable within 30 days (Phase 2).
 
 ## Verification & Testing
-- Generate a prompt and check if it appears in the history list.
-- Click 'Re-run' to ensure old variables are loaded.
-- Click favorite icon and verify state persists.
-- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [epics-and-stories.md](../epics-and-stories.md) for full system specifications.
+- Click delete on a history item → confirm → verify item removed from list.
+- Verify `generated_prompts.deleted_at` is set (not physically deleted).
+- Test bulk delete: select multiple items → delete → verify all removed.
+- Verify deleted items no longer appear in `/history` queries.
+- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [use-cases.md](../use-cases.md) for full system specifications.

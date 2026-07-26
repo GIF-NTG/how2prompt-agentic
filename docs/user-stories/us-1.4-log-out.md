@@ -18,16 +18,18 @@
 
 ## Technical Implementation Details
 - **Frontend Layer**:
-  - React Hook Form for validation.
-  - JWT token storage (access in memory, refresh in httpOnly cookie).
+  - Clear access token from Zustand store (in-memory).
+  - Redirect to the public home page after logout.
 - **Backend Layer**:
-  - Spring Boot Gateway for auth endpoints.
-  - BCrypt password hashing.
+  - `POST /api/v1/auth/logout` endpoint.
+  - Set `revoked_at = NOW()` on the current `refresh_tokens` record.
+  - Clear the httpOnly cookie containing the refresh token.
 - **Database Layer**:
-  - PostgreSQL `users` and `workspaces` tables.
+  - Update `refresh_tokens` table (`revoked_at` column).
 
 ## Verification & Testing
-- Navigate to the relevant auth page.
-- Submit valid and invalid data to observe success redirects and error states.
-- Check browser cookies for refresh token.
-- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [epics-and-stories.md](../epics-and-stories.md) for full system specifications.
+- Click "Log out" from profile menu → verify redirected to public home page.
+- Verify httpOnly cookie is cleared (no refresh token in browser).
+- Verify access token is no longer in memory (Zustand store reset).
+- Attempt to access a protected route after logout → verify redirect to login page.
+- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [use-cases.md](../use-cases.md) for full system specifications.

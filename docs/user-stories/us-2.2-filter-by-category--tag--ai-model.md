@@ -18,16 +18,20 @@
 
 ## Technical Implementation Details
 - **Frontend Layer**:
-  - React Query for data fetching and caching.
-  - Debounced input for full-text search.
+  - Category sidebar (multi-select), AI model dropdown, tag multi-select chips.
+  - URL query string updated on filter change (deep-linkable).
+  - Total count badge reflecting filtered results.
+  - React Query to refetch on filter change.
 - **Backend Layer**:
-  - Spring Data JPA with pagination.
-  - Redis caching for featured/trending endpoints.
+  - `GET /api/v1/templates?category=...&model=...&tags=...` endpoint.
+  - Joins via N:M tables: `template_categories`, `template_tags`, `template_models`.
+  - Returns results with total count for badge display.
 - **Database Layer**:
-  - PostgreSQL `tsvector` and `pg_trgm` for search indexing.
+  - Queries across `templates`, `template_categories`, `template_tags`, `template_models`, `categories`, `tags`, `ai_models` tables.
 
 ## Verification & Testing
-- Visit the explore page to ensure templates render.
-- Apply filters and verify the URL query string updates.
-- Perform a search and verify latency < 200ms.
-- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [epics-and-stories.md](../epics-and-stories.md) for full system specifications.
+- Select a category → verify list narrows to matching templates.
+- Select a model + tags → verify combined filter works correctly.
+- Verify URL query string updates and is sharable (deep-linking).
+- Click "Clear filters" → verify list resets to full results.
+- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [use-cases.md](../use-cases.md) for full system specifications.
