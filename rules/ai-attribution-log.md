@@ -1,5 +1,7 @@
 # AI Attribution Log
 
+**GLOBAL STATEMENT: This project is 100% Agent-First / AI-generated with No Human Code. The entire backend codebase is considered AI-generated.**
+
 Operationalizes L2C certification requirement #5 (an audit-ready log of 10+ entries
 tracking AI's contribution to the codebase). The log itself is project data — it lives
 in the consuming project (e.g. `docs/ai-attribution-log.md` or a tracker of the team's
@@ -102,4 +104,10 @@ Refs: <ISSUE-ID>
 - **Bulk backfilling at the end of a sprint.** Filling in 10 entries in one sitting for
   last week's tasks produces wrong effort-delta and issue recollection. Log within 24h
   of merge.
+
+## Log Entries
+
+| `entry_id` | `date` | `sprint` | `task_id` | `task_description` | `ai_tool` | `ai_model` | `interaction_type` | `pct_ai_generated` | `pr_link` | `commit_sha` | `reviewer` | `effort_delta_pct` | `issues_found` | `notes` |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| `SPRINT-3-001` | `2026-08-04` | `Sprint 3` | `N/A` | `Test coverage for prompt and template modules (services, controllers, validators)` | `Antigravity/Claude` | `Gemini 3.1 Pro (High)` | `agent-first` | `100%` | `N/A` | `N/A` | `User` | `N/A` | `None` | `Current verified scope.` |
 </content>
