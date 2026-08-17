@@ -1,7 +1,8 @@
-# User Story 6.1: Admin Mark Template as Featured (UC-06.01)
+# User Story 5.6: Admin Mark Template as Featured (UC-05.06)
 
 ## Overview
-- **Epic**: Epic 6: Admin Content Management
+- **Epic**: Epic 5: Admin & Content Management
+- **Note**: Supplementary story beyond the base use-case catalog (SRS §3 / use-cases.md only define UC-05.01–UC-05.05); numbered UC-05.06 to stay within the Epic 5 range without colliding with Epic 6 (AI Enhancement, Phase 2).
 - **Priority**: P2
 - **User Persona**: Admin
 
@@ -36,4 +37,4 @@
 - Verify `GET /api/v1/templates/featured` returns the newly featured template.
 - Edit template again → uncheck "Featured" → save.
 - Verify `GET /api/v1/templates/featured` no longer returns the template.
-- Refer to [BA.md](../../.agent/BA.md), [srs.md](../srs.md), and [use-cases.md](../use-cases.md) for full system specifications.
+- Refer to [BA.md](../../agent/BA.md), [SRS.md](../SRS.md), and [use-cases.md](../use-cases.md) for full system specifications.

@@ -461,6 +461,188 @@ So that I can monitor active users, generated prompts, and popular templates.
   * **And** metrics are cached for 5 minutes.
   * **And** I can filter by custom date range.
 
+#### US-5.5: Review User-Submitted Templates (UC-05.04) — Priority: P2
+
+As an Admin,
+I want to review templates submitted by users for community publication,
+So that only quality, policy-compliant templates become publicly visible.
+
+* **Acceptance Criteria:**
+  * **Given** a template has `status='pending'` (submitted via US-7.5).
+  * **When** I open `/admin/moderation` and approve, reject (with `rejection_reason`), or request changes on it.
+  * **Then** it moves to `published`/`is_public=true`, `rejected`, or back to `draft` with my comment, respectively, and the author is notified.
+
+* **Business Rules:**
+  * Review SLA of 48 hours.
+  * Content that trips automated spam/keyword filters is auto-rejected before reaching the admin queue.
+
+---
+
+### Epic 6: AI Enhancement (Phase 2)
+
+#### US-6.1: AI Refine a Prompt (UC-06.01) — Priority: P1 (High)
+
+As a logged-in, verified User,
+I want to ask AI to refine a prompt I've generated,
+So that I get a clearer, more effective version without manually rewriting it.
+
+* **Acceptance Criteria:**
+  * **Given** I have generated a prompt and still have AI Refine quota.
+  * **When** I click `[Refine with AI]`.
+  * **Then** the backend calls the LLM Adapter (default GPT-4o) with an optimization meta-prompt and returns a refined version plus an explanation.
+  * **And** I see a diff view (original vs. refined) and can `[Accept]` (replaces `final_prompt`), `[Edit manually]`, or `[Reject]`.
+
+* **Exception Scenarios:**
+  * Quota exhausted → `402 Payment Required`, invites upgrade to Pro.
+  * LLM timeout > 30s → `504 Gateway Timeout`, allows retry.
+  * LLM returns policy-violating content → filtered, soft-refuse error.
+
+* **Business Rules:**
+  * Free plan: 5 refines/day. Pro: 100 refines/day.
+  * The refine model is admin-configurable.
+
+#### US-6.2: AI Score a Prompt (UC-06.02) — Priority: P2 (Medium)
+
+As a logged-in User,
+I want to have AI score my generated prompt against quality criteria,
+So that I understand its strengths and weaknesses before using it.
+
+* **Acceptance Criteria:**
+  * **Given** I have already generated a prompt.
+  * **When** I click `[Score this prompt]`.
+  * **Then** the LLM returns scores (0-10) for clarity, specificity, context, format, plus an overall score and suggestions, saved to `generated_prompts.ai_score`.
+  * **And** the frontend renders a radar chart with the suggestions list.
+
+* **Business Rules:**
+  * A disclaimer 'AI assessment for reference only' is always displayed alongside the score.
+
+#### US-6.3: Multi-Model Translation (UC-06.04) — Priority: P2 (Medium)
+
+As a logged-in User,
+I want to convert a prompt written for one AI model into the equivalent for another model,
+So that I can reuse my prompt on a different tool without rewriting it by hand.
+
+* **Acceptance Criteria:**
+  * **Given** I have a generated prompt optimized for one model.
+  * **When** I click `[Translate to another model]` and select the target model.
+  * **Then** the LLM converts the prompt's syntax/style to the target model while preserving intent, saved as a new, separate history record.
+
+* **Business Rules:**
+  * Especially relevant for text-to-image-model conversions (e.g., Midjourney/DALL·E), which require a significant structural rewrite.
+
+#### US-6.4: Playground (UC-06.03) — Priority: P1 (High)
+
+As a logged-in User,
+I want to test my prompt live against a real AI model,
+So that I can see the actual response before using the prompt elsewhere.
+
+* **Acceptance Criteria:**
+  * **Given** I have Playground quota remaining.
+  * **When** I select a model, adjust temperature/max_tokens (within plan limits), and click `[Run]`.
+  * **Then** the backend calls the LLM Adapter, streams the response if supported, and saves the response plus `tokens_used`, `latency_ms`, `model_version`.
+
+* **Exception Scenarios:**
+  * Provider rate limit → circuit breaker opens, fallback message shown.
+  * Response exceeds `max_tokens` → truncated with a warning.
+
+* **Business Rules:**
+  * Free: 10 runs/day, 500 output tokens. Pro: 200 runs/day, 4000 output tokens. Team: unlimited per seat (Phase 4).
+
+#### US-6.5: Share a Prompt via Public Link (UC-06.05) — Priority: P2 (Medium)
+
+As a logged-in User who owns a generated prompt,
+I want to share it via a public link,
+So that others can view it without needing an account.
+
+* **Acceptance Criteria:**
+  * **Given** I own a `generated_prompt`.
+  * **When** I click `[Share]`.
+  * **Then** the backend generates a `share_slug` (nanoid, 10 chars), sets `is_public=true`, and I get a `/p/{share_slug}` URL viewable without login.
+  * **And** I can revoke sharing (`is_public=false`, `share_slug=NULL`).
+
+* **Business Rules:**
+  * The public page only shows `final_prompt`, the original template, and the model used; `input_values` are hidden if the owner selected 'hide inputs'.
+
+---
+
+### Epic 7: Template Customization & Versioning (Phase 2)
+
+#### US-7.1: Fork a Template into a Personal Workspace (UC-07.01) — Priority: P1 (High)
+
+As a logged-in User,
+I want to fork a public or official template into my personal workspace,
+So that I can customize it without affecting the original.
+
+* **Acceptance Criteria:**
+  * **Given** a template is public or official.
+  * **When** I click `[Fork]`.
+  * **Then** the backend clones the template, its current version, variables, and variants into my personal workspace with `is_official=false`, `is_public=false`, `status='draft'`, and `forked_from_template_id`/`forked_from_version_id` set.
+  * **And** the source template's `fork_count` is incremented.
+
+* **Business Rules:**
+  * A fork does not automatically receive updates when the original gets a new version.
+  * A user can fork the same template multiple times, each an independent copy.
+
+#### US-7.2: Edit a Personal Template (UC-07.02) — Priority: P1 (High)
+
+As a User who owns a template (a fork or one I created),
+I want to edit its title, description, prompt body, and variables,
+So that I can tailor it to my exact needs.
+
+* **Acceptance Criteria:**
+  * **Given** I am in the editor for a template I own.
+  * **When** I edit the content and CRUD `template_variables`/`template_variants`, then click `[Save]`.
+  * **Then** a new `template_versions` record is created if `prompt_body`/variables changed, preserving old history against the old version.
+
+* **Exception Scenarios:**
+  * Deleting a variable still referenced in `prompt_body` → warning, requires removing the placeholder first.
+
+* **Business Rules:**
+  * Maximum 30 fields per template (Free), 100 (Pro).
+  * `var_key` must be unique per `template_version`, snake_case, no diacritics.
+
+#### US-7.3: Create a New Template from Scratch (UC-07.03) — Priority: P2 (Medium)
+
+As a logged-in User with remaining template-creation quota,
+I want to create a brand-new template from an empty editor,
+So that I can build a prompt template for a use case not already covered by the library.
+
+* **Acceptance Criteria:**
+  * **Given** I click `[+ New Template]` from `/my-templates`.
+  * **When** I fill in title, description, taxonomy, models, `prompt_body`, and variables.
+  * **Then** I can `[Save Draft]` or `[Publish (submit for review)]`.
+
+* **Business Rules:**
+  * Free plan: limited to 10 templates per user. Pro: unlimited.
+
+#### US-7.4: Manage Template Versions (UC-07.04) — Priority: P2 (Medium)
+
+As an Author who owns a template with multiple versions,
+I want to view, compare, and switch which version is current,
+So that I can control which version new users receive while preserving history for old ones.
+
+* **Acceptance Criteria:**
+  * **Given** my template has multiple `template_versions`.
+  * **When** I open the 'Versions' tab.
+  * **Then** I see version metadata, can diff two versions, and can mark one as `is_current`.
+
+* **Business Rules:**
+  * Old versions cannot be deleted (existing `generated_prompts` may reference them); they can be archived instead.
+
+#### US-7.5: Submit a Template for Community Review (UC-07.05) — Priority: P2 (Medium)
+
+As an Author with a draft template that has valid variables and a `prompt_body`,
+I want to submit it for community review,
+So that it can become a publicly available template after admin approval.
+
+* **Acceptance Criteria:**
+  * **Given** my template is in draft status with sufficient content.
+  * **When** I click `[Submit for review]` and pass the pre-flight checklist (cover image, i18n description, example output, guide, at least 1 category).
+  * **Then** `status='pending'`, the admin queue is notified, and I receive a confirmation email.
+
+* **Exception Scenarios:**
+  * Content violation (keyword spam) → auto-rejected with a message, never enters the admin queue.
+
 ---
 
 ## 3. System Integration & Data Schemas
@@ -658,3 +840,15 @@ All REST APIs serialize errors in the following format:
 | US-5.2 | UC-05.02 | Epic 5, US-5.2 | `us-5.2-manage-categories-and-tags.md` |
 | US-5.3 | UC-05.03 | Epic 5, US-5.3 | `us-5.3-create-and-publish-official-templates.md` |
 | US-5.4 | UC-05.05 | Epic 5, US-5.5 | `us-5.4-view-the-analytics-dashboard.md` |
+| US-5.5 | UC-05.04 | Epic 5 (Phase 2) | `us-5.5-review-user-submitted-templates.md` |
+| US-5.6 | UC-05.06 | — (supplementary, not in base catalog) | `us-5.6-admin-mark-template-as-featured.md` |
+| US-6.1 | UC-06.01 | Epic 6, US-6.1 (Phase 2) | `us-6.1-ai-refine-a-prompt.md` |
+| US-6.2 | UC-06.02 | Epic 6, US-6.2 (Phase 2) | `us-6.2-ai-score-a-prompt.md` |
+| US-6.3 | UC-06.04 | Epic 6, US-6.3 (Phase 2) | `us-6.3-translate-a-prompt-between-models.md` |
+| US-6.4 | UC-06.03 | Epic 6, US-6.4 (Phase 2) | `us-6.4-run-a-prompt-in-the-playground.md` |
+| US-6.5 | UC-06.05 | Epic 6, US-6.5 (Phase 2) | `us-6.5-share-a-prompt-via-public-link.md` |
+| US-7.1 | UC-07.01 | Epic 7, US-7.1 (Phase 2) | `us-7.1-fork-a-template.md` |
+| US-7.2 | UC-07.02 | Epic 7, US-7.2 (Phase 2) | `us-7.2-edit-a-personal-template.md` |
+| US-7.3 | UC-07.03 | Epic 7 (Phase 2, not itemized in SRS §3 table) | `us-7.3-create-a-new-template-from-scratch.md` |
+| US-7.4 | UC-07.04 | Epic 7, US-7.3 (Phase 2) | `us-7.4-manage-template-versions.md` |
+| US-7.5 | UC-07.05 | Epic 7, US-7.4 (Phase 2) | `us-7.5-submit-a-template-for-community-review.md` |
