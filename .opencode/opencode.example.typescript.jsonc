@@ -9,15 +9,20 @@
 // .claude/hooks/common/block-destructive.sh cannot be reused verbatim here.
 // This reproduces their *behavior* (format+lint TS/JS files on write; block a
 // few obviously destructive bash patterns) using OpenCode's native config surface.
+//
+// Commands below match how2prompt-ui's actual toolchain (npm — package-lock.json,
+// no pnpm-lock.yaml; oxlint per package.json's "lint" script, not eslint). If a
+// different consuming project uses pnpm/yarn or eslint instead, adjust the two
+// formatter commands for that project.
 {
   "$schema": "https://opencode.ai/config.json",
   "formatter": {
     "prettier": {
-      "command": ["pnpm", "exec", "prettier", "--write", "$FILE"],
+      "command": ["npm", "exec", "--no", "--", "prettier", "--write", "$FILE"],
       "extensions": [".ts", ".tsx", ".js", ".jsx"]
     },
-    "eslint": {
-      "command": ["pnpm", "exec", "eslint", "--fix", "$FILE"],
+    "oxlint": {
+      "command": ["npm", "exec", "--no", "--", "oxlint", "--fix", "$FILE"],
       "extensions": [".ts", ".tsx", ".js", ".jsx"]
     }
   },
