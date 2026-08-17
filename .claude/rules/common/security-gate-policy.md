@@ -13,7 +13,7 @@ examples get shipped as-is), deprecated/vulnerable dependencies, and missed auth
 A SAST tool catches most of these mechanically, before merge — a human reviewer scanning
 a diff will miss what "looks fine."
 
-This repo's `skills/security-review` + `agents/security-reviewer.md` are the
+This repo's `.claude/skills/security-review` + `.claude/agents/security-reviewer.md` are the
 **pre-merge, human/agent-assisted review layer** — a fast sanity check on the current
 diff. They are not a substitute for an actual SAST tool wired into CI; use both.
 

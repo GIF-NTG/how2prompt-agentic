@@ -1,20 +1,28 @@
 # Cline Rules — how2prompt-agentic
 
-You are an AI coding assistant working on the how2prompt project. This repository enforces Spec-Driven Development (SDD) via GitHub's **Spec-Kit**.
+You are an AI coding assistant working on a how2prompt service repository. This
+repository enforces Spec-Driven Development (SDD) via GitHub's **Spec-Kit**, plus a
+shared Claude Code harness (`.claude/agents/`, `.claude/rules/`) for coding, testing,
+and security standards.
 
 ## Spec-Driven Development Rules
-- **Do not write code before planning:** You must only write code that is mapped to a task in `.specify/specs/how2prompt-mvp/tasks.md` and supported by `.specify/specs/how2prompt-mvp/plan.md`.
-- **Core Specification:** The source of truth for the features is `.specify/specs/how2prompt-mvp/spec.md`. Do not introduce functionality not defined in the specification.
-- **Project Constitution:** The governing architectural principles are defined in `.specify/memory/constitution.md`. You must verify that every code change conforms to these principles.
+
+- **Do not write code before planning:** Only write code mapped to a task in this
+  project's own `.specify/specs/<feature>/tasks.md`, supported by that feature's
+  `plan.md`. If neither exists yet, run `/speckit.specify` and `/speckit.plan` first.
+- **Core Specification:** The source of truth is `.specify/specs/<feature>/spec.md`. Do
+  not introduce functionality not defined there.
+- **Project Constitution:** Once this project has run `/speckit.constitution`, verify
+  every change conforms to `.specify/memory/constitution.md`.
 - **Workflow Steps:**
-  1. Read `.specify/specs/how2prompt-mvp/spec.md` to understand requirements.
-  2. Read `.specify/specs/how2prompt-mvp/plan.md` to understand tech stack and constraints.
-  3. Consult `.specify/specs/how2prompt-mvp/tasks.md` and implement the tasks sequentially.
+  1. Read `spec.md` to understand requirements.
+  2. Read `plan.md` to understand tech stack and constraints.
+  3. Consult `tasks.md` and implement the tasks sequentially.
   4. Write automated tests for each implemented task.
 
-## Key Platform Constraints (from Constitution)
-- **Stateless Python Service:** The Python Prompt Service must remain 100% stateless. Do not add database connections or persistent state. All parameters must come via the request body.
-- **FastAPI / Pydantic Contracts:** Request and response schemas must be strictly defined with Pydantic. Do not use raw dictionary inputs.
-- **LiteLLM Wrapper:** Use LiteLLM for LLM connections. Do not install LangChain or LangGraph.
-- **Retry & Error Standards:** Implement tenacity backoff retries for LLM calls (up to 3 times). Catch failures and format error responses as RFC-7807 problem details (HTTP 502 with `LLM_PROVIDER_ERROR` code).
-- **Postgres JSONB:** The database uses JSONB columns to persist active variables and history logs.
+## Coding standards
+
+Read the relevant rule file from `.claude/rules/` just-in-time (not all at once):
+`common/coding-style.md`, `common/testing.md`, `common/security.md`,
+`common/code-review.md`, plus the stack-specific guide (`python/`, `java/`, or
+`typescript/guidelines.md`) for whichever service you're editing.

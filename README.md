@@ -1,22 +1,25 @@
 # how2prompt-agentic
 
-Shared Spec-Kit configuration for the how2prompt team — the **Spec-Driven Development
-(SDD)** tooling (Claude Code / Cursor / OpenCode skills & commands, CLI scripts,
-templates, workflows) that every service repository (React `frontend/`, Spring Boot
-`backend/`, Python `agent/`, ...) starts from. Kept in one repo so updates propagate to
-every service instead of being copy-pasted and drifting out of sync.
+Shared agentic tooling for the how2prompt team — the **Spec-Driven Development (SDD)**
+workflow (Claude Code / Cursor / OpenCode skills & commands, CLI scripts, templates,
+workflows) plus a Claude Code harness (agents/rules/skills/commands under `.claude/`)
+that each service repository starts from. Currently consumed by two repos:
+`how2prompt-ui` (React frontend) and `how2prompt-api` (Java/Spring Boot backend). Kept
+in one repo so updates propagate to both instead of being copy-pasted and drifting out
+of sync.
 
-This repo itself also dogfoods Spec-Kit for its own governance (see
-`.specify/specs/how2prompt-mvp/`, `.specify/memory/constitution.md`, `docs/`) — that
-content is this repo's own example/tracking data, **not** part of the shared surface
-synced into other services (see below).
+This repo can also dogfood Spec-Kit for its own governance once real work starts here
+(`/speckit.constitution`, `/speckit.specify` — see the "This Repo's Own Governance"
+section in `CLAUDE.md`) — that content, once created, is this repo's own
+example/tracking data, **not** part of the shared surface synced into other services
+(see below).
 
 ---
 
 ## Quick Start
 
-For a service repo (`frontend/`, `backend/`, `agent/`, ...) that doesn't have this
-tooling yet:
+For a service repo (`how2prompt-ui`, `how2prompt-api`, or a future one) that doesn't
+have this tooling yet:
 
 ```bash
 # 1. Install the Spec-Kit CLI (once per machine)
@@ -176,19 +179,25 @@ bash how2prompt-agentic/scripts/sync.sh
 
 This script **copies** (never symlinks) the generic, cross-project tooling into your
 own service repo:
-- Spec-Kit integration skills into `.claude/skills/` (for Claude Code).
+- Claude Code harness — `.claude/agents/`, `.claude/skills/`, `.claude/rules/`,
+  `.claude/commands/` (agents, Spec-Kit + workflow skills, coding/testing/security
+  rules, slash commands).
 - Spec-Kit integration skills into `.cursor/skills/` (for Cursor).
 - Spec-Kit integration commands into `.opencode/commands/` (for OpenCode).
 - The Spec-Kit CLI scripts, base templates, and workflows into `.specify/`.
 
-It deliberately does **not** touch `.specify/agents`, `.specify/memory`,
-`.specify/specs`, or `.specify/templates/overrides` — those hold project-specific
-constitution/spec content. Symlinking or copying them would make every service that
-submodules this repo share (and clobber) the same spec state. Run `specify init` or
-`/speckit.constitution` / `/speckit.specify` **in your own service repo** to create your
-own `.specify/memory/constitution.md` and `.specify/specs/`.
+It deliberately does **not** touch `.claude/settings*.json`, `.claude/hooks/`,
+`.specify/agents`, `.specify/memory`, `.specify/specs`, or
+`.specify/templates/overrides` — settings/hooks are machine-local (wiring them
+automatically would clobber a dev's own setup; copy a hook recipe from
+`.claude/rules/{python,java,typescript}/guidelines.md` by hand instead), and the
+`.specify/*` paths hold project-specific constitution/spec content. Symlinking or
+copying those would make every service that submodules this repo share (and clobber)
+the same spec state. Run `specify init` or `/speckit.constitution` / `/speckit.specify`
+**in your own service repo** to create your own `.specify/memory/constitution.md` and
+`.specify/specs/`.
 
-The copies under `.claude/skills/`, `.cursor/skills/`, `.opencode/commands/`, and
+The copies under `.claude/`, `.cursor/skills/`, `.opencode/commands/`, and
 `.specify/{scripts,templates,workflows}/` are generated — don't hand-edit them. Edit the
 source in `how2prompt-agentic/` and re-run `sync.sh`.
 
@@ -240,6 +249,16 @@ When working inside AI coding assistants supporting Spec-Kit (Claude Code, Curso
 | `/speckit.analyze` | `/speckit-analyze` | Run cross-artifact consistency and quality analysis across spec, plan, and tasks. |
 | `/speckit.converge` | `/speckit-converge` | Compare codebase to spec/plan and generate tasks for any remaining gaps. |
 
+### Claude Code harness commands (`.claude/commands/`)
+
+| Command | Description |
+| :--- | :--- |
+| `/code-review` | Review the current diff for quality/security/maintainability via the `code-reviewer` (+ `security-reviewer` when applicable) agents. |
+| `/security-scan` | Focused OWASP Top 10 review of the current diff via the `security-reviewer` agent. |
+
+See `.claude/rules/common/agents.md` for the full agent roster and when to invoke each
+one directly instead of through a slash command.
+
 ---
 
 ## 4. Spec-Kit Directory Structure
@@ -248,7 +267,14 @@ Spec-Kit specifications and configuration files are organized inside the hidden 
 
 ```text
 how2prompt-agentic/
-├── .claude/skills/            # [synced] Integration skills for Claude Code
+├── .claude/
+│   ├── agents/                 # [synced] planner, tdd-guide, code-reviewer, security-reviewer
+│   ├── skills/                 # [synced] speckit-* + ai-attribution, debugging, pr-description,
+│   │                           #          research, security-review
+│   ├── rules/                  # [synced] common/ + python/, java/, typescript/ guidelines
+│   ├── commands/                # [synced] code-review.md, security-scan.md
+│   ├── hooks/                    # [local-only] machine-local hook scripts, if any
+│   └── settings.json              # [local-only] machine-local Claude Code settings
 ├── .cursor/skills/            # [synced] Integration skills for Cursor
 ├── .opencode/commands/        # [synced] Markdown integration commands for OpenCode
 ├── scripts/
@@ -256,19 +282,20 @@ how2prompt-agentic/
 ├── .specify/
 │   ├── scripts/                # [synced] Spec-Kit CLI helper scripts
 │   ├── templates/               # [synced, top-level only] base spec/plan/tasks templates
-│   │   └── overrides/           # [local-only] this repo's own customized templates
+│   │   └── overrides/           # [local-only] this repo's own customized templates, once created
 │   ├── workflows/                # [synced] workflow definitions
 │   ├── integration.json         # [local-only] installed-integrations state for this repo
 │   ├── init-options.json        # [local-only] `specify init` parameters used for this repo
-│   ├── agents/                   # [local-only] this repo's own agent role docs
+│   ├── agents/                   # [local-only] this repo's own agent role docs, once created
 │   ├── memory/
-│   │   └── constitution.md      # [local-only] this repo's own governing constitution
-│   └── specs/
-│       └── how2prompt-mvp/      # [local-only] this repo's own example feature spec
+│   │   └── constitution.md      # [local-only] this repo's own governing constitution, once created
+│   └── specs/                    # [local-only] this repo's own feature specs, once created
 ```
 
 `[synced]` = copied into other repos by `scripts/sync.sh`. `[local-only]` = specific to
-this repo's own use of Spec-Kit; never copied elsewhere.
+this repo's own use of Spec-Kit, or machine-local config; never copied elsewhere. The
+`.specify/` local-only paths don't exist yet in a fresh checkout — they're created the
+first time you run `/speckit.constitution` / `/speckit.specify` in this repo.
 
 ---
 *Developed by Spec Kit & How2Prompt Team.*

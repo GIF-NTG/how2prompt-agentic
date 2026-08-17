@@ -24,7 +24,7 @@ coverage is a bonus, not required.
 ## Workflow
 
 1. Identify the scope that counts as "AI-generated" (a whole file, or part of one) —
-   track this via the AI Attribution Log (`rules/ai-attribution-log.md`), not just a
+   track this via the AI Attribution Log (`.claude/rules/common/ai-attribution-log.md`), not just a
    comment.
 2. Have the agent list branches and edge cases *before* writing any test — see
    `documents/prompt-library/PT-TEST-GEN-001-test-generation.md`.

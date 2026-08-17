@@ -5,7 +5,7 @@ description: Use after a PR with AI involvement has merged, to draft an AI Attri
 
 ## Overview
 
-Draft one AI Attribution Log entry (schema in `rules/ai-attribution-log.md`) and, if the
+Draft one AI Attribution Log entry (schema in `.claude/rules/common/ai-attribution-log.md`) and, if the
 commit doesn't already have one, an `AI-Attribution` commit trailer — from the merged
 PR and the conversation, instead of the developer reconstructing the schema from memory.
 
@@ -31,7 +31,7 @@ created post-merge, not while work is still in flight).
    invent a number.
 
 4. **Produce two outputs**:
-   - The log entry, filled into the schema from `rules/ai-attribution-log.md`, ready to
+   - The log entry, filled into the schema from `.claude/rules/common/ai-attribution-log.md`, ready to
      append to the project's log file.
    - The `AI-Attribution` commit trailer block, in case the merge commit doesn't already
      carry one (useful for a squash-merge workflow where the trailer needs to be added

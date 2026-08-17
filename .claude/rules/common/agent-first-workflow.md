@@ -18,7 +18,7 @@ follow when a project or team member is.
 
 3. **Require a plan before code, and wait for approval.** "List the files you'll
    create/change and why. Wait for confirmation before editing." This repo already
-   provides this step via `skills/speckit-plan` (and the specify → plan → tasks →
+   provides this step via `.claude/skills/speckit-plan` (and the specify → plan → tasks →
    implement chain) — use it instead of asking for an ad-hoc plan when Spec Kit is
    available. Approve the plan, not each diff.
 
