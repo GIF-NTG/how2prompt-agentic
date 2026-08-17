@@ -7,7 +7,7 @@
 #
 # Copies the generic, cross-project tooling (agents, skills, rules, commands,
 # Spec-Kit scripts/templates/workflows) from the submodule into the consuming
-# project's own .claude/, .cursor/, .opencode/ and .specify/ trees.
+# project's own .claude/, .opencode/ and .specify/ trees.
 #
 # Deliberately COPIES instead of symlinking, and deliberately does NOT touch
 # .claude/settings.json, .claude/hooks/, .specify/agents, .specify/memory,
@@ -50,16 +50,6 @@ for dir in agents skills rules commands; do
     cp -R "$item" "$DEST/.claude/$dir/$name"
   done
   echo "✓ Synced .claude/$dir"
-done
-
-# Cursor skills
-mkdir -p "$DEST/.cursor/skills"
-for skill in "$SRC"/.cursor/skills/speckit-*; do
-  [ -d "$skill" ] || continue
-  name=$(basename "$skill")
-  rm -rf "$DEST/.cursor/skills/$name"
-  cp -R "$skill" "$DEST/.cursor/skills/$name"
-  echo "✓ Synced Cursor skill: $name"
 done
 
 # OpenCode commands

@@ -1,7 +1,7 @@
 # how2prompt-agentic
 
 Shared agentic tooling for the how2prompt team — the **Spec-Driven Development (SDD)**
-workflow (Claude Code / Cursor / OpenCode skills & commands, CLI scripts, templates,
+workflow (Claude Code / OpenCode skills & commands, CLI scripts, templates,
 workflows) plus a Claude Code harness (agents/rules/skills/commands under `.claude/`)
 that each service repository starts from. Currently consumed by two repos:
 `how2prompt-ui` (React frontend) and `how2prompt-api` (Java/Spring Boot backend). Kept
@@ -33,7 +33,7 @@ git submodule add <repository-url> how2prompt-agentic
 bash how2prompt-agentic/scripts/sync.sh
 
 # 4. Create your service's own constitution and first feature spec
-#    (run inside your AI assistant, e.g. Claude Code / Cursor / OpenCode)
+#    (run inside your AI assistant, e.g. Claude Code / OpenCode)
 /speckit.constitution
 /speckit.specify "describe the feature"
 ```
@@ -42,7 +42,7 @@ If you're cloning a service repo that **already** has this submodule:
 
 ```bash
 git submodule update --init --recursive   # pull the submodule's content
-bash how2prompt-agentic/scripts/sync.sh   # re-sync into your local .claude/.cursor/.opencode/.specify
+bash how2prompt-agentic/scripts/sync.sh   # re-sync into your local .claude/.opencode/.specify
 ```
 
 To pick up updates published to this repo later:
@@ -50,7 +50,7 @@ To pick up updates published to this repo later:
 ```bash
 git submodule update --remote --merge how2prompt-agentic
 bash how2prompt-agentic/scripts/sync.sh
-git add .claude .cursor .opencode .specify how2prompt-agentic
+git add .claude .opencode .specify how2prompt-agentic
 git commit -m "chore: update how2prompt-agentic shared tooling"
 ```
 
@@ -59,7 +59,7 @@ the full slash-command reference, and section 4 for what's synced vs. local-only
 
 The submodule + sync mechanism is identical for every service, regardless of stack —
 only the constitution/spec content you write in step 4 differs, since it should reflect
-that service's own architecture (React vs. Spring Boot vs. Python, etc.).
+that service's own architecture (React vs. Spring Boot, etc.).
 
 ### Example: integrating into `how2prompt-ui` (frontend)
 
@@ -83,7 +83,7 @@ bash how2prompt-agentic/scripts/sync.sh
 #    /speckit.specify "describe the frontend feature"
 
 # 5. Commit the submodule pointer and the synced (generated, non-symlinked) files
-git add .gitmodules how2prompt-agentic .claude .cursor .opencode .specify
+git add .gitmodules how2prompt-agentic .claude .opencode .specify
 git commit -m "chore: integrate how2prompt-agentic shared Spec-Kit tooling"
 ```
 
@@ -109,7 +109,7 @@ bash how2prompt-agentic/scripts/sync.sh
 #    /speckit.specify "describe the backend feature"
 
 # 5. Commit the submodule pointer and the synced (generated, non-symlinked) files
-git add .gitmodules how2prompt-agentic .claude .cursor .opencode .specify
+git add .gitmodules how2prompt-agentic .claude .opencode .specify
 git commit -m "chore: integrate how2prompt-agentic shared Spec-Kit tooling"
 ```
 
@@ -117,7 +117,7 @@ Later, to pick up updates published to `how2prompt-agentic` (same for either rep
 ```bash
 git submodule update --remote --merge how2prompt-agentic
 bash how2prompt-agentic/scripts/sync.sh
-git add how2prompt-agentic .claude .cursor .opencode .specify
+git add how2prompt-agentic .claude .opencode .specify
 git commit -m "chore: update how2prompt-agentic shared tooling"
 ```
 
@@ -145,7 +145,7 @@ This repository is designed to be integrated as a Git submodule inside the **roo
 directory of a specific service/component repository** (such as your React `frontend/`
 repository or Spring Boot `backend/` repository).
 
-Integrating it this way enables your AI coding assistant (Claude Code, Cursor, OpenCode)
+Integrating it this way enables your AI coding assistant (Claude Code, OpenCode)
 to access Spec-Kit specifications and commands directly from the workspace root of that
 specific service.
 
@@ -182,7 +182,6 @@ own service repo:
 - Claude Code harness — `.claude/agents/`, `.claude/skills/`, `.claude/rules/`,
   `.claude/commands/` (agents, Spec-Kit + workflow skills, coding/testing/security
   rules, slash commands).
-- Spec-Kit integration skills into `.cursor/skills/` (for Cursor).
 - Spec-Kit integration commands into `.opencode/commands/` (for OpenCode).
 - The Spec-Kit CLI scripts, base templates, and workflows into `.specify/`.
 
@@ -197,7 +196,7 @@ the same spec state. Run `specify init` or `/speckit.constitution` / `/speckit.s
 **in your own service repo** to create your own `.specify/memory/constitution.md` and
 `.specify/specs/`.
 
-The copies under `.claude/`, `.cursor/skills/`, `.opencode/commands/`, and
+The copies under `.claude/`, `.opencode/commands/`, and
 `.specify/{scripts,templates,workflows}/` are generated — don't hand-edit them. Edit the
 source in `how2prompt-agentic/` and re-run `sync.sh`.
 
@@ -205,7 +204,7 @@ source in `how2prompt-agentic/` and re-run `sync.sh`.
 
 ## 2. Spec-Kit Development Environment Setup
 
-This project is pre-configured with Spec-Kit integrations for popular AI Coding Assistants: **Claude Code**, **Cursor**, and **OpenCode**.
+This project is pre-configured with Spec-Kit integrations for popular AI Coding Assistants: **Claude Code** and **OpenCode**.
 
 ### Install Spec-Kit CLI (`specify`)
 To run specifications and development automation workflows, you need to install the `specify-cli`. The recommended installation is via `uv` (a fast Python package manager) or `pipx`:
@@ -220,10 +219,9 @@ pipx install specify-cli
 *After installation, verify it by running `specify version`.*
 
 ### Installed Integrations in this Repository
-The project integrates and generates commands/skills for 3 AI assistants:
+The project integrates and generates commands/skills for 2 AI assistants:
 1. **Claude Code:** Integration skills are installed under `.claude/skills/`.
-2. **Cursor:** Integration skills are installed under `.cursor/skills/`.
-3. **OpenCode:** Markdown integration commands are installed under `.opencode/commands/`.
+2. **OpenCode:** Markdown integration commands are installed under `.opencode/commands/`.
 
 *Note: The global Spec-Kit state configuration file is located at `.specify/integration.json`.*
 
@@ -231,12 +229,12 @@ The project integrates and generates commands/skills for 3 AI assistants:
 
 ## 3. SDD Slash Commands Table
 
-When working inside AI coding assistants supporting Spec-Kit (Claude Code, Cursor, OpenCode), you can call these slash commands directly to automate tasks.
+When working inside AI coding assistants supporting Spec-Kit (Claude Code, OpenCode), you can call these slash commands directly to automate tasks.
 
-*   For **Claude Code** and **Cursor** (use hyphen `-`): e.g., `/speckit-specify`
+*   For **Claude Code** (use hyphen `-`): e.g., `/speckit-specify`
 *   For **OpenCode** (use dot `.`): e.g., `/speckit.specify`
 
-| Slash Command (OpenCode) | Slash Command (Claude/Cursor) | Description |
+| Slash Command (OpenCode) | Slash Command (Claude Code) | Description |
 | :--- | :--- | :--- |
 | `/speckit.constitution` | `/speckit-constitution` | Initialize or update the shared project constitution. |
 | `/speckit.specify` | `/speckit-specify` | Create or update the feature specification (`spec.md`) from user description. |
@@ -271,11 +269,10 @@ how2prompt-agentic/
 │   ├── agents/                 # [synced] planner, tdd-guide, code-reviewer, security-reviewer
 │   ├── skills/                 # [synced] speckit-* + ai-attribution, debugging, pr-description,
 │   │                           #          research, security-review
-│   ├── rules/                  # [synced] common/ + python/, java/, typescript/ guidelines
+│   ├── rules/                  # [synced] common/ + java/, typescript/ guidelines
 │   ├── commands/                # [synced] code-review.md, security-scan.md
 │   ├── hooks/                    # [local-only] machine-local hook scripts, if any
 │   └── settings.json              # [local-only] machine-local Claude Code settings
-├── .cursor/skills/            # [synced] Integration skills for Cursor
 ├── .opencode/commands/        # [synced] Markdown integration commands for OpenCode
 ├── scripts/
 │   └── sync.sh                # Copies the [synced] items above into a consuming repo

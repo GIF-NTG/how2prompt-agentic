@@ -6,7 +6,7 @@ commands under `.claude/`) — submoduled into how2prompt's service repositories
 `scripts/sync.sh`. See `README.md` for the full integration pattern.
 
 **Synced surface** (copied into consuming repos by `sync.sh`): `.claude/agents/`,
-`.claude/skills/`, `.claude/rules/`, `.claude/commands/`, `.cursor/skills/`,
+`.claude/skills/`, `.claude/rules/`, `.claude/commands/`,
 `.opencode/commands/`, `.specify/scripts`, `.specify/templates` (top-level only), and
 `.specify/workflows`.
 
