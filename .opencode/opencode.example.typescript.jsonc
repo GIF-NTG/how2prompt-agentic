@@ -1,0 +1,35 @@
+// Reference only — OpenCode equivalent of .claude/settings.example.typescript.json.
+// Copy the relevant block into this project's own opencode.json / opencode.jsonc
+// by hand to enable it (same "machine-local, not auto-wired" rule as Claude's
+// settings.json — see how2prompt-agentic/scripts/sync.sh).
+//
+// Gap vs. Claude Code: OpenCode's `formatter` and `permission` config are
+// declarative (glob/pattern matching), not arbitrary scripts reading a JSON
+// stdin payload — so .claude/hooks/typescript/format-lint.sh and
+// .claude/hooks/common/block-destructive.sh cannot be reused verbatim here.
+// This reproduces their *behavior* (format+lint TS/JS files on write; block a
+// few obviously destructive bash patterns) using OpenCode's native config surface.
+{
+  "$schema": "https://opencode.ai/config.json",
+  "formatter": {
+    "prettier": {
+      "command": ["pnpm", "exec", "prettier", "--write", "$FILE"],
+      "extensions": [".ts", ".tsx", ".js", ".jsx"]
+    },
+    "eslint": {
+      "command": ["pnpm", "exec", "eslint", "--fix", "$FILE"],
+      "extensions": [".ts", ".tsx", ".js", ".jsx"]
+    }
+  },
+  "permission": {
+    "bash": {
+      "*": "allow",
+      "rm -rf /*": "deny",
+      "rm -rf ~*": "deny",
+      "rm -rf $HOME*": "deny",
+      "git push*--force*": "deny",
+      "git push*-f*": "ask",
+      "git reset --hard*": "ask"
+    }
+  }
+}

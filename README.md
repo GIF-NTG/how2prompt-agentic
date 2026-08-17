@@ -183,21 +183,32 @@ own service repo:
   `.claude/commands/`, `.claude/hooks/` (agents, Spec-Kit + workflow skills,
   coding/testing/security rules, slash commands, hook scripts), plus
   `.claude/settings.example.*.json` reference files.
-- Spec-Kit integration commands into `.opencode/commands/` (for OpenCode).
+- OpenCode integration — `.opencode/commands/` (Spec-Kit slash commands),
+  `.opencode/agents/` (hand-ported OpenCode equivalents of `.claude/agents/`), and
+  `.opencode/opencode.example.*.jsonc` (OpenCode equivalent of
+  `.claude/settings.example.*.json`). **Note:** OpenCode reads `.claude/skills/`
+  natively (Claude-compatible skill discovery), so skills need no separate OpenCode
+  copy — only agents and hook-equivalent config do, since OpenCode has no
+  `.claude/agents/`-reading mechanism and its `formatter`/`permission` config can't
+  execute the stdin-JSON hook scripts under `.claude/hooks/` verbatim.
 - The Spec-Kit CLI scripts, base templates, and workflows into `.specify/`.
 
 It deliberately does **not** touch `.claude/settings.json` (the actual hook wiring —
 copy the relevant block from a synced `settings.example.*.json` by hand; doing this
-automatically would clobber a dev's own setup), `.specify/agents`, `.specify/memory`,
+automatically would clobber a dev's own setup), nor `opencode.json`/`opencode.jsonc`
+for the same reason, `.specify/agents`, `.specify/memory`,
 `.specify/specs`, or `.specify/templates/overrides` — the `.specify/*` paths hold
 project-specific constitution/spec content. Symlinking or copying those would make
 every service that submodules this repo share (and clobber) the same spec state. Run
 `specify init` or `/speckit.constitution` / `/speckit.specify` **in your own service
 repo** to create your own `.specify/memory/constitution.md` and `.specify/specs/`.
 
-The copies under `.claude/`, `.opencode/commands/`, and
-`.specify/{scripts,templates,workflows}/` are generated — don't hand-edit them. Edit the
-source in `how2prompt-agentic/` and re-run `sync.sh`.
+The copies under `.claude/`, `.opencode/commands/`, `.opencode/agents/`,
+`.opencode/opencode.example.*.jsonc`, and `.specify/{scripts,templates,workflows}/` are
+generated — don't hand-edit them. Edit the source in `how2prompt-agentic/` and re-run
+`sync.sh`. If you add or edit a Claude agent under `.claude/agents/`, port the same
+change to `.opencode/agents/` by hand (frontmatter schema differs — no automatic
+translation) so Claude Code and OpenCode users stay at parity.
 
 ---
 
@@ -275,7 +286,13 @@ how2prompt-agentic/
 │   ├── hooks/                    # [synced] hook scripts (common/, java/, typescript/) — inert until wired
 │   ├── settings.example.*.json    # [synced] reference wiring, copy into your own settings.json
 │   └── settings.json              # [local-only] machine-local Claude Code settings (actual hook wiring)
-├── .opencode/commands/        # [synced] Markdown integration commands for OpenCode
+├── .opencode/
+│   ├── commands/               # [synced] Markdown integration commands for OpenCode
+│   ├── agents/                 # [synced] hand-ported OpenCode equivalents of .claude/agents/
+│   │                           #          (OpenCode reads .claude/skills/ natively but not
+│   │                           #          .claude/agents/, so these are kept in parallel)
+│   └── opencode.example.*.jsonc  # [synced] reference formatter/permission config, OpenCode
+│                                #          equivalent of .claude/settings.example.*.json
 ├── scripts/
 │   └── sync.sh                # Copies the [synced] items above into a consuming repo
 ├── .specify/

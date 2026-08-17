@@ -1,0 +1,31 @@
+// Reference only — OpenCode equivalent of .claude/settings.example.java.json.
+// Copy the relevant block into this project's own opencode.json / opencode.jsonc
+// by hand to enable it (same "machine-local, not auto-wired" rule as Claude's
+// settings.json — see how2prompt-agentic/scripts/sync.sh).
+//
+// Gap vs. Claude Code: OpenCode's `formatter` and `permission` config are
+// declarative (glob/pattern matching), not arbitrary scripts reading a JSON
+// stdin payload — so .claude/hooks/java/format.sh and
+// .claude/hooks/common/block-destructive.sh cannot be reused verbatim here.
+// This reproduces their *behavior* (format .java files on write; block a few
+// obviously destructive bash patterns) using OpenCode's native config surface.
+{
+  "$schema": "https://opencode.ai/config.json",
+  "formatter": {
+    "spotify-fmt": {
+      "command": ["./mvnw", "-q", "com.spotify.fmt:fmt-maven-plugin:format"],
+      "extensions": [".java"]
+    }
+  },
+  "permission": {
+    "bash": {
+      "*": "allow",
+      "rm -rf /*": "deny",
+      "rm -rf ~*": "deny",
+      "rm -rf $HOME*": "deny",
+      "git push*--force*": "deny",
+      "git push*-f*": "ask",
+      "git reset --hard*": "ask"
+    }
+  }
+}

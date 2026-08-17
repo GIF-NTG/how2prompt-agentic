@@ -8,8 +8,12 @@ commands under `.claude/`) — submoduled into how2prompt's service repositories
 **Synced surface** (copied into consuming repos by `sync.sh`): `.claude/agents/`,
 `.claude/skills/`, `.claude/rules/`, `.claude/commands/`, `.claude/hooks/` (the hook
 scripts — inert until wired), `.claude/settings.example.*.json`,
-`.opencode/commands/`, `.specify/scripts`, `.specify/templates` (top-level only), and
-`.specify/workflows`.
+`.opencode/commands/`, `.opencode/agents/` (hand-ported OpenCode equivalents of
+`.claude/agents/` — OpenCode reads `.claude/skills/` natively but has no
+`.claude/agents/` equivalent, so keep both in sync by hand when editing an agent),
+`.opencode/opencode.example.*.jsonc` (OpenCode equivalent of
+`.claude/settings.example.*.json`), `.specify/scripts`, `.specify/templates`
+(top-level only), and `.specify/workflows`.
 
 **Local-only** (never synced — specific to this repo's own governance, or machine-local):
 `.claude/settings.json` (the actual wiring — copy from a `settings.example.*.json`
