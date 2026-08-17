@@ -180,21 +180,20 @@ bash how2prompt-agentic/scripts/sync.sh
 This script **copies** (never symlinks) the generic, cross-project tooling into your
 own service repo:
 - Claude Code harness — `.claude/agents/`, `.claude/skills/`, `.claude/rules/`,
-  `.claude/commands/` (agents, Spec-Kit + workflow skills, coding/testing/security
-  rules, slash commands).
+  `.claude/commands/`, `.claude/hooks/` (agents, Spec-Kit + workflow skills,
+  coding/testing/security rules, slash commands, hook scripts), plus
+  `.claude/settings.example.*.json` reference files.
 - Spec-Kit integration commands into `.opencode/commands/` (for OpenCode).
 - The Spec-Kit CLI scripts, base templates, and workflows into `.specify/`.
 
-It deliberately does **not** touch `.claude/settings*.json`, `.claude/hooks/`,
-`.specify/agents`, `.specify/memory`, `.specify/specs`, or
-`.specify/templates/overrides` — settings/hooks are machine-local (wiring them
-automatically would clobber a dev's own setup; copy a hook recipe from
-`.claude/rules/{python,java,typescript}/guidelines.md` by hand instead), and the
-`.specify/*` paths hold project-specific constitution/spec content. Symlinking or
-copying those would make every service that submodules this repo share (and clobber)
-the same spec state. Run `specify init` or `/speckit.constitution` / `/speckit.specify`
-**in your own service repo** to create your own `.specify/memory/constitution.md` and
-`.specify/specs/`.
+It deliberately does **not** touch `.claude/settings.json` (the actual hook wiring —
+copy the relevant block from a synced `settings.example.*.json` by hand; doing this
+automatically would clobber a dev's own setup), `.specify/agents`, `.specify/memory`,
+`.specify/specs`, or `.specify/templates/overrides` — the `.specify/*` paths hold
+project-specific constitution/spec content. Symlinking or copying those would make
+every service that submodules this repo share (and clobber) the same spec state. Run
+`specify init` or `/speckit.constitution` / `/speckit.specify` **in your own service
+repo** to create your own `.specify/memory/constitution.md` and `.specify/specs/`.
 
 The copies under `.claude/`, `.opencode/commands/`, and
 `.specify/{scripts,templates,workflows}/` are generated — don't hand-edit them. Edit the
@@ -266,13 +265,16 @@ Spec-Kit specifications and configuration files are organized inside the hidden 
 ```text
 how2prompt-agentic/
 ├── .claude/
-│   ├── agents/                 # [synced] planner, tdd-guide, code-reviewer, security-reviewer
+│   ├── agents/                 # [synced] planner, tdd-guide, code-reviewer, security-reviewer,
+│   │                           #          java-reviewer, typescript-reviewer, database-reviewer
 │   ├── skills/                 # [synced] speckit-* + ai-attribution, debugging, pr-description,
-│   │                           #          research, security-review
+│   │                           #          research, security-review, api-design, database-migrations,
+│   │                           #          springboot-patterns, frontend-patterns
 │   ├── rules/                  # [synced] common/ + java/, typescript/ guidelines
 │   ├── commands/                # [synced] code-review.md, security-scan.md
-│   ├── hooks/                    # [local-only] machine-local hook scripts, if any
-│   └── settings.json              # [local-only] machine-local Claude Code settings
+│   ├── hooks/                    # [synced] hook scripts (common/, java/, typescript/) — inert until wired
+│   ├── settings.example.*.json    # [synced] reference wiring, copy into your own settings.json
+│   └── settings.json              # [local-only] machine-local Claude Code settings (actual hook wiring)
 ├── .opencode/commands/        # [synced] Markdown integration commands for OpenCode
 ├── scripts/
 │   └── sync.sh                # Copies the [synced] items above into a consuming repo

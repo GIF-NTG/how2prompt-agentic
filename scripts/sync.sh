@@ -10,19 +10,22 @@
 # project's own .claude/, .opencode/ and .specify/ trees.
 #
 # Deliberately COPIES instead of symlinking, and deliberately does NOT touch
-# .claude/settings.json, .claude/hooks/, .specify/agents, .specify/memory,
-# .specify/specs, .specify/templates/overrides, or the *.json integration-state
-# files: those are either machine-local config (hooks/settings.json — wiring
-# them automatically would clobber a dev's own setup) or this-project-specific
-# spec/constitution content. Symlinking (or copying) those would make every
-# project that submodules this repo read and write into the SAME shared
-# directory, clobbering each other's specs.
+# .claude/settings.json, .specify/agents, .specify/memory, .specify/specs,
+# .specify/templates/overrides, or the *.json integration-state files: those are
+# either machine-local config (settings.json — wiring hooks into it automatically
+# would clobber a dev's own setup) or this-project-specific spec/constitution
+# content. Symlinking (or copying) those would make every project that submodules
+# this repo read and write into the SAME shared directory, clobbering each
+# other's specs.
+#
+# .claude/hooks/ (the hook SCRIPTS, not the settings.json that wires them) IS
+# synced — the scripts are inert until referenced from settings.json, so there's
+# no clobber risk. Copy the matching settings.example.<stack>.json block into
+# your own project's .claude/settings.json by hand to actually enable a hook.
 #
 # Each consuming project gets its own `.specify/memory/constitution.md` and
 # `.specify/specs/` via `specify init` / `/speckit.constitution` /
-# `/speckit.specify`, run locally in that project. Hook wiring recipes live as
-# documentation in `.claude/rules/{python,java,typescript}/guidelines.md` —
-# copy the snippet you need into your own `.claude/settings.json` by hand.
+# `/speckit.specify`, run locally in that project.
 #
 # These copies are generated — don't hand-edit them. Edit the source under
 # how2prompt-agentic/ and re-run this script.
@@ -38,9 +41,9 @@ fi
 
 echo "Syncing shared tooling from $SRC/..."
 
-# Claude Code: agents, skills, rules, commands (everything under .claude/ except
-# settings*.json and hooks/, which are machine-local)
-for dir in agents skills rules commands; do
+# Claude Code: agents, skills, rules, commands, hooks (everything under .claude/
+# except settings*.json, which is machine-local)
+for dir in agents skills rules commands hooks; do
   [ -d "$SRC/.claude/$dir" ] || continue
   mkdir -p "$DEST/.claude/$dir"
   for item in "$SRC/.claude/$dir"/*; do
@@ -50,6 +53,15 @@ for dir in agents skills rules commands; do
     cp -R "$item" "$DEST/.claude/$dir/$name"
   done
   echo "✓ Synced .claude/$dir"
+done
+
+# Claude Code settings examples (reference only — never overwrites the
+# project's own settings.json)
+for example in "$SRC"/.claude/settings.example.*.json; do
+  [ -f "$example" ] || continue
+  name=$(basename "$example")
+  cp "$example" "$DEST/.claude/$name"
+  echo "✓ Synced .claude/$name"
 done
 
 # OpenCode commands
@@ -69,4 +81,4 @@ cp -R "$SRC/.specify/workflows/." "$DEST/.specify/workflows/"
 echo "✓ Synced .specify/scripts, .specify/templates (base), .specify/workflows"
 
 echo "Sync complete. Run 'specify init' / '/speckit.constitution' in this project to create your own .specify/memory and .specify/specs."
-echo "Optional: copy a hook recipe from .claude/rules/{python,java,typescript}/guidelines.md into this project's own .claude/settings.json."
+echo "Optional: copy the relevant block from .claude/settings.example.<stack>.json into this project's own .claude/settings.json to enable hooks."

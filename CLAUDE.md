@@ -6,12 +6,14 @@ commands under `.claude/`) — submoduled into how2prompt's service repositories
 `scripts/sync.sh`. See `README.md` for the full integration pattern.
 
 **Synced surface** (copied into consuming repos by `sync.sh`): `.claude/agents/`,
-`.claude/skills/`, `.claude/rules/`, `.claude/commands/`,
+`.claude/skills/`, `.claude/rules/`, `.claude/commands/`, `.claude/hooks/` (the hook
+scripts — inert until wired), `.claude/settings.example.*.json`,
 `.opencode/commands/`, `.specify/scripts`, `.specify/templates` (top-level only), and
 `.specify/workflows`.
 
 **Local-only** (never synced — specific to this repo's own governance, or machine-local):
-`.claude/settings*.json`, `.claude/hooks/`, `.specify/agents/`, `.specify/memory/`,
+`.claude/settings.json` (the actual wiring — copy from a `settings.example.*.json`
+by hand), `.specify/agents/`, `.specify/memory/`,
 `.specify/specs/`, `.specify/templates/overrides/`, the `.specify/*.json` state files.
 A consuming repo builds its own `.specify/memory/constitution.md` and `.specify/specs/`
 via `/speckit.constitution` and `/speckit.specify`, run locally in that repo.
