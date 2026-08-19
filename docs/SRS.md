@@ -12,7 +12,7 @@ Version: 2.0
 
 ### 1.1 Purpose of the Document
 
-This SRS document defines the detailed requirements for the How2Prompt platform — a full-stack web application that helps users improve their prompt-writing skills for popular AI agents (ChatGPT, Claude, Gemini, Midjourney, DALL·E, etc.). The document serves as a shared reference for the entire development team (Frontend, Backend, DevOps, Product) throughout the product lifecycle, from MVP through enterprise-scale expansion.
+This SRS document defines the detailed requirements for the How2Prompt platform — a full-stack web application that helps users improve their prompt-writing skills for popular AI agents (ChatGPT, Claude, Gemini, Midjourney, DALL·E, etc.). The document serves as a shared reference for the entire development team (Frontend, Backend, DevOps, Product) throughout the product lifecycle, from MVP through later feature phases.
 
 ### 1.2 Product Vision
 
@@ -20,8 +20,8 @@ How2Prompt is built with the vision of becoming the standard platform for how pe
 
 - A library of high-quality prompt templates, curated by experts.
 - Dynamic forms that let users fill in information based on a template and automatically generate a complete prompt.
-- AI-powered prompt optimization, scoring, and live testing (Playground).
-- A community for sharing templates, plus team workspaces for organizations.
+- AI-powered prompt optimization and scoring.
+- A community for sharing templates, plus Projects for grouping related prompts.
 
 ### 1.3 System Scope
 
@@ -31,19 +31,18 @@ How2Prompt is built with the vision of becoming the standard platform for how pe
 - Multi-model AI support: OpenAI, Anthropic, Google, Midjourney, DALL·E, and extensible to more.
 - A template library curated by admins initially, gradually opened up to user submissions and the community.
 - Dynamic forms that generate prompts based on variables declared in the template.
-- Multi-tenancy built in from the start (personal workspace → team/enterprise workspace).
+- Multi-tenancy built in from the start via a personal workspace per user.
 - Multi-language support (Vietnamese & English) from the MVP onward.
 - Template fork & customization mechanism (Phase 2).
-- Playground for live prompt testing with an LLM (Phase 2).
 - Community features: upvote, comment, follow, marketplace (Phase 3).
-- Freemium subscription and team features (Phase 4).
+- Grouping generated prompts into Projects, similar to ChatGPT Projects (Phase 4).
 
 #### 1.3.2 Out of Scope — Month 1 MVP
 
-- Native mobile apps (iOS/Android) — planned from Phase 4 onward.
+- Native mobile apps (iOS/Android).
 - Fine-tuning a proprietary AI model.
-- Payment integration (available only in Phase 4).
-- API for external developers (available only in Phase 4).
+- Payment integration.
+- API for external developers.
 
 ### 1.4 Target Users
 
@@ -54,7 +53,6 @@ The product serves four main user groups, prioritized in increasing order across
 | General Users (A) | Individuals new to AI with no technical background. | Need easy-to-understand templates to quickly create quality prompts. | Phase 1 |
 | Developers / Prompt Engineers (B) | Software engineers who work extensively with LLMs. | Need technical templates (code review, debugging, refactoring), deep customization, and model comparison. | Phase 1 |
 | Content Creators / Marketers / Teachers (C) | Content creators, teachers, and marketers. | Need templates for copywriting, SEO, lesson plans, and content ideas. | Phase 1 |
-| Enterprises / Teams (D) | Teams and organizations that want to standardize how they use AI. | Need a shared workspace, role-based permissions, internal template sharing, and quota control. | Phase 4 |
 
 ### 1.5 Glossary
 
@@ -68,10 +66,10 @@ The product serves four main user groups, prioritized in increasing order across
 | Template Version | A version of a template (v1, v2, ...). Each major edit creates a new version while preserving history. |
 | Workspace | A working space that holds templates and data. There are two types: personal and team. |
 | Fork | Creating a copy of a template to customize within a user's own workspace without affecting the original. |
-| Playground | An environment for testing prompts live with an LLM directly inside the app to see the output. |
 | AI Refine | A feature that uses an LLM to optimize and improve the quality of a prompt written by the user. |
 | AI Score | A quality score for a prompt, evaluated by AI according to criteria (clarity, specificity, context, etc.). |
 | i18n | Internationalization — support for multiple languages (Vietnamese, English). |
+| Project | A user-defined container that groups related generated prompts together, optionally with its own custom instructions — similar to ChatGPT Projects. |
 
 ---
 
@@ -126,12 +124,12 @@ The system uses a layered client-server architecture, ready to scale horizontall
 15. The user opens the template editor, edits the prompt body, adds/edits/removes variables, and selects the target model.
 16. The user saves the template as Private (for their own use only) or Publish (shared with the community).
 
-#### Flow 4: Enterprise sharing of internal templates (UJ4) — Phase 4
+#### Flow 4: Group prompts into a Project (UJ4) — Phase 4
 
-17. A company admin creates a workspace of type 'team' and invites members with roles (owner/admin/editor/viewer).
-18. The admin/editor creates internal (non-public) templates and assigns categories, tags, and models.
-19. Team members use the shared templates, and all changes are recorded in an audit log.
-20. The company purchases a subscription plan to raise quotas (AI refine, playground, number of seats).
+17. The user creates a new Project (name, optional description/icon).
+18. The user adds existing generated prompts to the project, or generates new prompts directly within the project context.
+19. The user optionally sets project-level custom instructions that are automatically applied to every prompt generated inside the project.
+20. The user browses and manages prompts grouped by project on the Projects page.
 
 ### 2.4 Constraints and Assumptions
 
@@ -212,8 +210,6 @@ User stories are grouped by Epic. Each Epic is tied to a phase in the roadmap.
 |---|---|---|
 | US-6.1 | AI refine prompt | Calls an LLM to improve a user-written prompt and returns an optimized version. |
 | US-6.2 | AI score prompt | Scores a prompt against criteria (clarity, specificity, context, format). |
-| US-6.3 | Multi-model translation | Converts a prompt from one model's format to another's (e.g., from GPT to Claude). |
-| US-6.4 | Playground | Live prompt testing: select a model, call the API, and display the response and metadata (tokens, latency). |
 | US-6.5 | Share a prompt via public link | Generates a share_slug so a prompt can be shared externally and viewed without logging in. |
 
 ### Epic 7: Template Customization & Versioning (Phase 2)
@@ -237,18 +233,16 @@ User stories are grouped by Epic. Each Epic is tied to a phase in the roadmap.
 | US-8.6 | Public user profile | A public page at /u/{username} showing the user's public templates and prompts. |
 | US-8.7 | Notification system | In-app notifications for comments, follows, template approvals, etc. |
 
-### Epic 9: Team Workspace & Billing (Phase 4)
+### Epic 9: Prompt Projects (Phase 4)
 
 | ID | Feature Name | Summary |
 |---|---|---|
-| US-9.1 | Create team workspace | A company creates a workspace of type 'team' and invites members via email. |
-| US-9.2 | Role-based access control | Owner/Admin/Editor/Viewer with corresponding permissions. |
-| US-9.3 | Shared template library | A team's internal templates, not shared publicly with the community. |
-| US-9.4 | Team analytics | Statistics on most-used templates, active members, and quota usage. |
-| US-9.5 | Freemium subscription | Free / Pro / Team Starter / Team Pro. Integrated with Stripe. |
-| US-9.6 | Usage quota enforcement | Counts and limits AI Refine calls, Playground calls, and template creation per plan. |
-| US-9.7 | Developer API access | Issues API keys, manages scopes, and logs call history. |
-| US-9.8 | Audit log | Records all significant actions for enterprise compliance. |
+| US-9.1 | Create project | The user creates a Project with a name and optional description/icon to group related prompts. |
+| US-9.2 | Add prompt to project | The user adds an existing generated prompt to a project, or generates a new prompt directly inside one. |
+| US-9.3 | View project prompts | A project detail page lists all prompts grouped under it, filterable by template and date. |
+| US-9.4 | Project-level custom instructions | The user sets custom instructions/context on a project that are automatically applied to every prompt generated within it. |
+| US-9.5 | Move / remove prompt from project | The user moves a prompt to a different project or removes it from a project without deleting the prompt itself. |
+| US-9.6 | Rename / delete project | The user renames a project or deletes it (soft-delete); prompts inside are unassigned, not deleted. |
 
 ---
 
@@ -275,8 +269,8 @@ User stories are grouped by Epic. Each Epic is tied to a phase in the roadmap.
 | Templates (core) | templates, template_versions, template_variables, template_variants, template_categories, template_tags, template_models | The heart of the system. |
 | Generated Prompts | generated_prompts | History of prompts generated by users. |
 | Community | favorites, votes, comments, follows, reports | Community interactions. |
-| Billing | plans, subscriptions, usage_quotas | Freemium and enterprise billing. |
-| System | audit_logs, notifications, api_keys, refresh_tokens | Operations and security. |
+| Prompt Projects | projects, project_prompts | Groups generated prompts into a project, similar to ChatGPT Projects. |
+| System | notifications, refresh_tokens | Operations and security. |
 
 Full details of all tables, columns, indexes, and constraints are specified in the accompanying schema SQL file (schema.sql / how2prompt.dbml).
 
@@ -297,7 +291,7 @@ Full details of all tables, columns, indexes, and constraints are specified in t
 | /auth/oauth/google | GET/POST | Log in via Google OIDC. |
 | /auth/refresh | POST | Refresh the access token using the refresh token. |
 | /users/me | GET / PATCH | View / update the personal profile. |
-| /workspaces | GET / POST | List a user's workspaces; create a new workspace (Phase 4). |
+| /workspaces | GET / POST | List a user's workspaces; create a new workspace. |
 | /ai-models | GET | List active AI models. |
 | /categories | GET | List categories (including nested). |
 | /tags | GET | List popular tags. |
@@ -314,22 +308,23 @@ Full details of all tables, columns, indexes, and constraints are specified in t
 
 - `POST /generated-prompts/{id}/refine` — AI Refine.
 - `POST /generated-prompts/{id}/score` — AI Score.
-- `POST /playground/run` — Run a prompt in the playground.
 - `POST /templates/{id}/fork` — Fork a template into the personal workspace.
 - `POST /templates/{id}/comments` — Post a comment (Phase 3).
-- `POST /subscriptions` — Subscribe to a plan (Phase 4).
-- `POST /api-keys` — Create an API key (Phase 4).
+- `POST /projects` / `GET /projects` — Create / list the user's projects (Phase 4).
+- `POST /projects/{id}/prompts` — Add a generated prompt to a project, or move it from another project (Phase 4).
+- `GET /projects/{id}/prompts` — List the prompts grouped under a project (Phase 4).
+- `DELETE /projects/{id}/prompts/{promptId}` — Remove a prompt from a project without deleting the prompt (Phase 4).
+- `PATCH /projects/{id}` — Rename a project, or update its description/custom instructions (Phase 4).
+- `DELETE /projects/{id}` — Delete a project; its prompts become unassigned (Phase 4).
 
 ### 4.4 Third-Party Integrations
 
 | Integration | Phase | Notes |
 |---|---|---|
 | Google OAuth (OIDC) | Phase 1 | Fast login. |
-| OpenAI API | Phase 2 | AI Refine, Score, Playground. |
-| Anthropic API | Phase 2 | AI Refine, Score, Playground. |
-| Google Gemini API | Phase 2 | Playground. |
+| OpenAI API | Phase 2 | AI Refine, Score. |
+| Anthropic API | Phase 2 | AI Refine, Score. |
 | Midjourney (proxy) | Phase 2 | Prompts for the image model. |
-| Stripe | Phase 4 | Subscription billing. |
 | SendGrid / Resend | Phase 1 | Sends verification emails, password resets, and notifications. |
 | Sentry | Phase 2 | Error tracking. |
 
@@ -363,11 +358,11 @@ Full details of all tables, columns, indexes, and constraints are specified in t
 - Redis used for sessions, rate limiting, and caching hot templates — enabling horizontal scaling.
 - DB read replicas for heavy queries starting in Phase 3+.
 - CDN for static assets and cover images.
-- Job queue (RabbitMQ or Redis Streams) for heavy tasks (AI refine, playground calls) in Phase 2.
+- Job queue (RabbitMQ or Redis Streams) for heavy tasks (AI refine calls) in Phase 2.
 
 ### 5.4 Reliability
 
-- Uptime target of 99.5% for the MVP, 99.9% for Phase 4 (enterprise).
+- Uptime target of 99.5% for the MVP, improving toward 99.9% as the platform scales.
 - Daily database backups with 30-day retention. Point-in-time recovery from Phase 3.
 - Circuit breaker for LLM calls (Resilience4j). Clear fallback behavior when a provider is down.
 - Health check endpoint `/actuator/health` for Kubernetes.
@@ -415,8 +410,6 @@ Goal: launch a usable MVP version, focused on the core flow.
 ### Phase 2 — AI Enhancement (Months 2-3)
 
 - AI Refine, AI Score.
-- Multi-model variants & translation.
-- Playground for live prompt testing.
 - Share prompts via public link.
 - Fork templates and customize fields.
 - Template versioning.
@@ -430,15 +423,12 @@ Goal: launch a usable MVP version, focused on the core flow.
 - Public user profile.
 - Notification system.
 
-### Phase 4 — Enterprise & Monetization (Month 6+)
+### Phase 4 — Prompt Projects (Month 6+)
 
-- Team workspace, role-based access.
-- Internal shared template library.
-- Freemium subscription (Stripe), usage quota enforcement.
-- Team analytics dashboard.
-- Developer API access + API key management.
-- Full audit log for compliance.
-- Mobile app (React Native).
+- Create, rename, and delete Projects to group related generated prompts.
+- Add/move/remove generated prompts to and from a project.
+- Project-level custom instructions applied automatically to prompts generated inside it.
+- Projects page: browse and filter prompts grouped by project.
 
 ---
 
@@ -452,7 +442,6 @@ Goal: launch a usable MVP version, focused on the core flow.
 | Users don't understand how to use templates | Medium | Inline guides in templates, example outputs, tooltips for each field. |
 | UGC spam in Phase 3 | Medium | Moderation queue, report abuse, rate-limit template creation. |
 | Vendor lock-in with a single LLM provider | Low | Adapter pattern from the start, easy to swap providers. |
-| Data compliance (GDPR, Vietnam's Decree 13) | Medium | From Phase 4: audit log, data deletion rights, personal data export. |
 
 ---
 

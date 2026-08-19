@@ -12,7 +12,7 @@ Version: 2.0
 
 ### 1.1 Purpose of the Document
 
-This document specifies all use cases for the How2Prompt platform — a system that provides a library of prompt templates, dynamic forms for generating prompts, and AI-powered enhancement features across multiple AI models. It covers all 4 phases of the roadmap: MVP → AI Enhancement → Community → Enterprise.
+This document specifies all use cases for the How2Prompt platform — a system that provides a library of prompt templates, dynamic forms for generating prompts, and AI-powered enhancement features across multiple AI models. It covers all 4 phases of the roadmap: MVP → AI Enhancement → Community → Prompt Projects.
 
 ### 1.2 List of Actors
 
@@ -21,12 +21,9 @@ This document specifies all use cases for the How2Prompt platform — a system t
 | Guest | Not logged in | Can view public templates, public prompts via share link, and register an account. |
 | User (Registered) | Registered user | Includes 3 groups: general users, developers, content creators. Can use templates, create prompts, save history, fork templates. |
 | Author | A user who has published a template | Can manage templates they created, and receives comments/votes/follows from the community. |
-| Workspace Owner | Owner of a team workspace | Manages the workspace, invites/removes members, handles subscription billing (Phase 4). |
-| Workspace Admin/Editor/Viewer | Team member | Has permissions corresponding to their role within the team workspace (Phase 4). |
 | Admin (System) | Platform administrator | Manages AI models, categories, tags; approves user-submitted templates; moderation. |
-| System (Automated) | System actor | Runs background jobs: rate limiting, sending emails, updating counters, syncing quotas, calling the LLM API. |
+| System (Automated) | System actor | Runs background jobs: rate limiting, sending emails, updating counters, calling the LLM API. |
 | External LLM Provider | Third party | OpenAI, Anthropic, Google Gemini, Midjourney, etc., called by the backend via an adapter. |
-| Stripe (Billing) | Third party | Handles subscription payments (Phase 4). |
 
 ### 1.3 Document Structure
 
@@ -39,7 +36,7 @@ This document specifies all use cases for the How2Prompt platform — a system t
 
 - **Format:** UC-XX.YY — where XX is the functional group number and YY is the sequence number within the group.
 - **Example:** UC-03.02 = Group 3 (Prompt Generation), use case #2.
-- **Phase:** P1 (MVP) / P2 (AI Enhancement) / P3 (Community) / P4 (Enterprise).
+- **Phase:** P1 (MVP) / P2 (AI Enhancement) / P3 (Community) / P4 (Prompt Projects).
 - **Priority:** High / Medium / Low.
 
 ---
@@ -80,8 +77,6 @@ The table below lists all 40 use cases across 9 functional groups, with clear ph
 | UC-05.05 | View the analytics dashboard | Admin | P1 | Medium |
 | UC-06.01 | Refine a prompt with AI | User | P2 | High |
 | UC-06.02 | Score a prompt with AI | User | P2 | Medium |
-| UC-06.03 | Run a prompt in the Playground | User | P2 | High |
-| UC-06.04 | Translate a prompt between models | User | P2 | Medium |
 | UC-06.05 | Share a prompt via public link | User | P2 | Medium |
 | UC-07.01 | Fork a template into a Personal Workspace | User | P2 | High |
 | UC-07.02 | Edit a personal template (CRUD fields) | User | P2 | High |
@@ -94,14 +89,12 @@ The table below lists all 40 use cases across 9 functional groups, with clear ph
 | UC-08.04 | View a user's public profile page | User/Guest | P3 | Medium |
 | UC-08.05 | Report abuse | User | P3 | Medium |
 | UC-08.06 | Receive & view notifications | User | P3 | Medium |
-| UC-09.01 | Create a Team Workspace | User (Owner) | P4 | High |
-| UC-09.02 | Invite members to a Team Workspace | Workspace Owner/Admin | P4 | High |
-| UC-09.03 | Assign permissions by role | Workspace Owner/Admin | P4 | High |
-| UC-09.04 | Manage the internal template library | Workspace Editor+ | P4 | High |
-| UC-09.05 | Subscribe & pay for a subscription | Workspace Owner | P4 | High |
-| UC-09.06 | Enforce usage quota | System | P4 | High |
-| UC-09.07 | Create & manage a developer API Key | User (Pro+) | P4 | Medium |
-| UC-09.08 | View the team analytics dashboard | Workspace Admin+ | P4 | Medium |
+| UC-09.01 | Create a Project | User | P4 | High |
+| UC-09.02 | Add a prompt to a Project | User | P4 | High |
+| UC-09.03 | View prompts within a Project | User | P4 | High |
+| UC-09.04 | Set project-level custom instructions | User | P4 | Medium |
+| UC-09.05 | Move or remove a prompt from a Project | User | P4 | Medium |
+| UC-09.06 | Rename or delete a Project | User | P4 | Medium |
 
 ---
 
@@ -199,7 +192,7 @@ The table below lists all 40 use cases across 9 functional groups, with clear ph
 - The email from Google matches an account already registered with email/password → merges identities, requiring confirmation.
 - Google returns an error/timeout → returns `502 Bad Gateway`, displaying a fallback 'Please try again'.
 
-*Note: In Phase 4, GitHub and Microsoft OAuth may be added using a similar flow.*
+*Note: GitHub and Microsoft OAuth may be added later using a similar flow.*
 
 ### UC-01.04: Log out
 
@@ -507,7 +500,7 @@ The table below lists all 40 use cases across 9 functional groups, with clear ph
 
 **Preconditions:** The form is valid, and a model has been selected.
 
-**Postconditions:** The final prompt is displayed, ready to copy or use in the Playground (Phase 2).
+**Postconditions:** The final prompt is displayed, ready to copy.
 
 **Main Flow:**
 
@@ -515,12 +508,11 @@ The table below lists all 40 use cases across 9 functional groups, with clear ph
 2. The frontend calls `POST /api/v1/templates/{id}/generate` with the payload `{ template_version_id, ai_model_id, input_values, extra_instructions }`.
 3. The backend renders the final prompt (UC-03.06), saves a record to `generated_prompts`, and increments `templates.usage_count`.
 4. The backend returns `{ generated_prompt_id, final_prompt, tokens_estimate }`.
-5. The frontend displays the prompt in a results panel with `[Copy]`, `[Save as favorite]`, `[Share link]` (Phase 2), `[Try in Playground]` (Phase 2) buttons.
+5. The frontend displays the prompt in a results panel with `[Copy]`, `[Save as favorite]`, `[Share link]` (Phase 2) buttons.
 6. The user clicks `[Copy]` → the prompt is written to the clipboard, showing a 'Copied' toast.
 
 **Exception Flow:**
 
-- Quota exceeded (Phase 4) → returns `402 Payment Required`.
 - Backend rendering error (invalid placeholder) → returns `500` with detailed logs, displaying a fallback 'An error occurred, please try again'.
 
 ### UC-03.06: Backend renders the prompt (source of truth)
@@ -572,7 +564,7 @@ The table below lists all 40 use cases across 9 functional groups, with clear ph
 **Business Rules:**
 
 - The record is soft-deleted (`deleted_at`), not hard-deleted, to preserve the audit trail.
-- Free plan: keeps the 100 most recent history items per user. Pro: unlimited (Phase 4).
+- Keeps the 100 most recent history items per user.
 
 ### UC-04.02: View personal prompt history
 
@@ -781,7 +773,7 @@ The table below lists all 40 use cases across 9 functional groups, with clear ph
 |---|---|---|
 | User | P2 | High |
 
-**Preconditions:** The user is logged in, has verified their email, and still has AI Refine quota remaining.
+**Preconditions:** The user is logged in and has verified their email.
 
 **Postconditions:** The prompt is improved, with a side-by-side comparison displayed.
 
@@ -789,16 +781,14 @@ The table below lists all 40 use cases across 9 functional groups, with clear ph
 
 1. After generating a prompt (UC-03.05), the user clicks `[Refine with AI]`.
 2. The frontend calls `POST /api/v1/generated-prompts/{id}/refine`.
-3. The backend checks `usage_quotas` (Phase 4) and increments `used_count`.
-4. The backend sends a request to the LLM Adapter (default GPT-4o) with a meta-prompt requesting optimization.
-5. The LLM returns a refined version + an explanation of the changes.
-6. The backend saves it to `generated_prompts.ai_refined` and returns it to the client.
-7. The frontend displays a diff view: the original prompt on the left, the refined prompt on the right, with bullet-point explanations.
-8. The user can `[Accept]` (replaces `final_prompt`), `[Edit manually]`, or `[Reject]`.
+3. The backend sends a request to the LLM Adapter (default GPT-4o) with a meta-prompt requesting optimization.
+4. The LLM returns a refined version + an explanation of the changes.
+5. The backend saves it to `generated_prompts.ai_refined` and returns it to the client.
+6. The frontend displays a diff view: the original prompt on the left, the refined prompt on the right, with bullet-point explanations.
+7. The user can `[Accept]` (replaces `final_prompt`), `[Edit manually]`, or `[Reject]`.
 
 **Exception Flow:**
 
-- Quota exhausted → returns `402`, inviting the user to upgrade to Pro.
 - LLM timeout > 30s → returns `504`, allows the user to retry.
 - LLM returns policy-violating content → filtered and returns a soft-refuse error.
 
@@ -828,56 +818,6 @@ The table below lists all 40 use cases across 9 functional groups, with clear ph
 **Business Rules:**
 
 - Results may be inaccurate → a disclaimer 'AI assessment for reference only' is displayed.
-
-### UC-06.03: Run a prompt in the Playground
-
-| Primary Actor | Phase | Priority |
-|---|---|---|
-| User | P2 | High |
-
-**Preconditions:** The user is logged in and has Playground quota.
-
-**Postconditions:** The LLM's response is displayed and saved to `generated_prompts.playground_response`.
-
-**Main Flow:**
-
-1. The user clicks `[Try in Playground]` or visits `/playground`.
-2. Selects a model, adjusts temperature/max_tokens (limited by plan).
-3. Clicks `[Run]`.
-4. The backend calls the corresponding LLM Adapter for the model, measuring latency and tokens.
-5. Returns the response to the client, displayed in real time if the model supports streaming.
-6. The backend saves the response + metadata (`tokens_used`, `latency_ms`, `model_version`) to `generated_prompts`.
-
-**Exception Flow:**
-
-- The provider returns a rate limit → the circuit breaker opens, showing a fallback message.
-- The response exceeds `max_tokens` → truncated with a warning.
-
-**Business Rules:**
-
-- Free: 10 times/day, limited to 500 output tokens.
-- Pro: 200 times/day, 4000 output tokens.
-- Team: unlimited per seat.
-
-### UC-06.04: Translate a prompt between models
-
-| Primary Actor | Phase | Priority |
-|---|---|---|
-| User | P2 | Medium |
-
-**Preconditions:** There's a prompt optimized for one model, and the user wants to use it on another.
-
-**Postconditions:** The prompt is rewritten to fit the target model's syntax.
-
-**Main Flow:**
-
-1. The user clicks `[Translate to another model]` and selects the target model.
-2. The backend calls the LLM with a meta-prompt: 'Convert the following prompt from ChatGPT to a style suited for Claude, preserving the original intent.'
-3. Returns the new prompt, saved to history as a separate record.
-
-**Business Rules:**
-
-- Especially useful when converting from a text prompt to an image prompt (Midjourney/DALL·E) — requires a significant structural change.
 
 ### UC-06.05: Share a prompt via public link
 
@@ -1098,7 +1038,6 @@ The table below lists all 40 use cases across 9 functional groups, with clear ph
 **Business Rules:**
 
 - Following is public (anyone can see follower counts).
-- The user can hide their following list in privacy settings (Phase 4).
 
 ### UC-08.04: View a user's public profile page
 
@@ -1163,194 +1102,121 @@ The table below lists all 40 use cases across 9 functional groups, with clear ph
 
 ---
 
-## 11. Group 9 — Enterprise & Billing (Phase 4)
+## 11. Group 9 — Prompt Projects (Phase 4)
 
-### UC-09.01: Create a Team Workspace
+### UC-09.01: Create a Project
 
 | Primary Actor | Phase | Priority |
 |---|---|---|
-| User (about to become Owner) | P4 | High |
+| User | P4 | High |
 
-**Preconditions:** The user is logged in, has a Pro plan or wants to subscribe to Team.
+**Preconditions:** The user is logged in.
 
-**Postconditions:** A workspace with `type='team'` is created, with the user as owner.
+**Postconditions:** A new `projects` record is created, owned by the user.
 
 **Main Flow:**
 
-1. The user goes to `/workspaces` → `[+ New Team Workspace]`.
-2. Enters a name, slug, and selects a plan.
-3. If not yet subscribed to a Team plan → switches to UC-09.05.
-4. After successful payment, the backend creates a `workspaces` record with `type='team'` and creates a `workspace_members` record with `role='owner'`.
-5. The user is redirected to the new workspace.
+1. The user goes to `/projects` → `[+ New Project]`.
+2. Enters a name and an optional description/icon.
+3. The backend creates a `projects` record with `owner_id = current_user`.
+4. The user is redirected to the new project's page.
 
 **Business Rules:**
 
-- A user can be the owner of multiple team workspaces.
-- The workspace slug must be unique system-wide.
+- A user can create an unlimited number of personal projects.
+- The project name must be unique within the user's own projects.
 
-### UC-09.02: Invite members to a Team Workspace
-
-| Primary Actor | Phase | Priority |
-|---|---|---|
-| Workspace Owner / Admin | P4 | High |
-
-**Preconditions:** There are still available seats under the plan.
-
-**Postconditions:** The member is added to `workspace_members`.
-
-**Main Flow:**
-
-1. The owner goes to `/workspaces/{slug}/members` → `[Invite]`.
-2. Enters an email and selects a role (admin/editor/viewer).
-3. The backend sends an invitation email containing a 7-day token.
-4. The recipient clicks the link → if they don't have an account, they quickly register; then accept the invite.
-5. The backend inserts into `workspace_members`.
-
-**Exception Flow:**
-
-- Seat limit exceeded → requires a plan upgrade.
-- Email is already a member → `409 Conflict`.
-
-### UC-09.03: Assign permissions by role
+### UC-09.02: Add a prompt to a Project
 
 | Primary Actor | Phase | Priority |
 |---|---|---|
-| Workspace Owner / Admin | P4 | High |
+| User | P4 | High |
 
-**Preconditions:** There are at least 2 members in the workspace.
+**Preconditions:** The user owns both the project and the generated prompt.
 
-**Postconditions:** The role is updated.
+**Postconditions:** The prompt is linked to the project.
 
 **Main Flow:**
 
-1. The owner goes to `/workspaces/{slug}/members`.
-2. Selects a user → changes their role.
-3. The backend updates `workspace_members.role`.
+1. From a generated prompt's `[Add to project]` menu, or from within a project's `[Generate]` action, the user selects/creates a project.
+2. The backend inserts a `project_prompts` record linking `project_id` and `generated_prompt_id`.
+3. When generated directly inside a project, `POST /templates/{id}/generate` includes `project_id` so the link is created in the same call.
 
 **Business Rules:**
 
-- Owner: full permissions, including deleting the workspace and billing.
-- Admin: invite/remove members, manage team templates, no billing access.
-- Editor: CRUD team templates, no member management.
-- Viewer: can only view/use team templates.
-- Cannot self-downgrade the owner role if there is only 1 owner. Must transfer ownership first.
+- A prompt can belong to at most one project at a time.
 
-### UC-09.04: Manage the internal template library
+### UC-09.03: View prompts within a Project
 
 | Primary Actor | Phase | Priority |
 |---|---|---|
-| Workspace Editor / Admin / Owner | P4 | High |
+| User | P4 | High |
 
-**Preconditions:** The user has Editor+ role in the workspace.
+**Preconditions:** The user owns the project.
 
-**Postconditions:** The template is created/edited within the team's `workspace_id`.
+**Postconditions:** The project's prompts are listed.
 
 **Main Flow:**
 
-1. Goes to `/workspaces/{slug}/templates`.
-2. Performs CRUD on templates similar to UC-07.02/07.03 but with `workspace_id` = team.
-3. Can set `is_public=false` (internal use only), without needing system admin approval.
-4. Can fork a public template into the team's workspace.
+1. The user opens `/projects/{id}`.
+2. The frontend calls `GET /projects/{id}/prompts`, optionally filtered by template or date.
+3. The backend returns prompts joined through `project_prompts`, paginated.
+
+### UC-09.04: Set project-level custom instructions
+
+| Primary Actor | Phase | Priority |
+|---|---|---|
+| User | P4 | Medium |
+
+**Preconditions:** The user owns the project.
+
+**Postconditions:** The project's `custom_instructions` field is saved.
+
+**Main Flow:**
+
+1. The user opens the project's settings and edits the custom instructions field.
+2. The frontend calls `PATCH /projects/{id}` with `custom_instructions`.
+3. From then on, generating a prompt inside this project automatically prepends the custom instructions before rendering.
 
 **Business Rules:**
 
-- Internal templates are not shown on `/explore`.
-- Viewer can only view, not edit.
-- A team template can be published to the community (moved to public status, requiring approval).
+- Custom instructions apply only to prompts generated inside the project going forward; existing prompts already in the project are not retroactively changed.
 
-### UC-09.05: Subscribe & pay for a subscription
+### UC-09.05: Move or remove a prompt from a Project
 
 | Primary Actor | Phase | Priority |
 |---|---|---|
-| Workspace Owner | P4 | High |
+| User | P4 | Medium |
 
-**Preconditions:** The user has a valid Stripe account.
+**Preconditions:** The user owns the prompt and the project(s) involved.
 
-**Postconditions:** The subscription is active, and the workspace is upgraded to the new plan.
+**Postconditions:** The `project_prompts` link is updated or removed; the prompt itself is never deleted.
 
 **Main Flow:**
 
-1. The owner goes to `/workspaces/{slug}/billing` → selects a plan.
-2. The backend calls Stripe to create a checkout session.
-3. The user is redirected to Stripe Checkout and completes payment.
-4. The Stripe webhook calls `POST /api/v1/webhooks/stripe`.
-5. The backend upserts `subscriptions` with `status='active'`, `current_period_start/end`.
-6. Updates `workspaces.plan`.
-7. The owner receives a confirmation email.
+1. From the prompt's `[Move to project]` or `[Remove from project]` action, the user picks the target.
+2. Moving: the backend updates the existing `project_prompts` row to the new `project_id`.
+3. Removing: the backend deletes the `project_prompts` row, leaving the prompt unassigned.
 
-**Alternative Flow:**
-
-- The owner can cancel: subscription `status='canceled'`, still usable until the end of the period.
-
-**Exception Flow:**
-
-- Payment fails → subscription `status='past_due'`, the workspace temporarily retains Pro features for 7 days before downgrading.
-
-### UC-09.06: Enforce usage quota
+### UC-09.06: Rename or delete a Project
 
 | Primary Actor | Phase | Priority |
 |---|---|---|
-| System | P4 | High |
+| User | P4 | Medium |
 
-**Preconditions:** The user performs a quota-consuming action (AI Refine, Playground call, template creation).
+**Preconditions:** The user owns the project.
 
-**Postconditions:** The quota is counted accurately, blocking when exceeded.
+**Postconditions:** The project is renamed, or soft-deleted with its prompts unassigned rather than deleted.
 
 **Main Flow:**
 
-1. Each time the user calls a quota-consuming feature, the backend queries `usage_quotas` by (`workspace_id`, `feature`, `period_start=today`).
-2. If no row exists → inserts one with `limit_count` from `plans.features`.
-3. Compares `used_count` vs `limit_count`. If there's room → increments `used_count` and allows the action.
-4. If exceeded → returns `402 Payment Required` with a clear message.
+1. The user opens the project's settings → `[Rename]` or `[Delete project]`.
+2. Rename: the backend updates `projects.name`.
+3. Delete: the backend soft-deletes the `projects` record (`deleted_at`) and removes the `project_prompts` links; the underlying `generated_prompts` rows are untouched.
 
 **Business Rules:**
 
-- Quota resets daily (`period_start=DATE_TRUNC('day')`).
-- For Team plans, quota is counted per workspace (not per user).
-- `limit_count = -1` means unlimited.
-
-### UC-09.07: Create & manage a developer API Key
-
-| Primary Actor | Phase | Priority |
-|---|---|---|
-| User (Pro plan and above) | P4 | Medium |
-
-**Preconditions:** The workspace has a Pro/Team plan.
-
-**Postconditions:** An API key is created, its hash saved in the database, with the plaintext shown only once.
-
-**Main Flow:**
-
-1. The user goes to `/workspaces/{slug}/api-keys` → `[+ Create key]`.
-2. Enters a name, selects scopes, and an optional `expires_at`.
-3. The backend generates a key `h2p_live_xxxxxxxxxxxx`, stores `key_hash`, and displays the `key_prefix` + plaintext once.
-4. The user copies the key and stores it somewhere safe.
-5. Afterward, only the `key_prefix` is shown for identification.
-
-**Alternative Flow:**
-
-- Revoking a key: sets `revoked_at`; any request using that key is subsequently rejected.
-
-**Business Rules:**
-
-- Every request using an API key is recorded in `audit_logs`.
-- Rate limiting applies according to the key's scope.
-
-### UC-09.08: View the team analytics dashboard
-
-| Primary Actor | Phase | Priority |
-|---|---|---|
-| Workspace Admin / Owner | P4 | Medium |
-
-**Preconditions:** The workspace has a Team plan.
-
-**Postconditions:** Metrics are displayed.
-
-**Main Flow:**
-
-1. The admin goes to `/workspaces/{slug}/analytics`.
-2. The backend queries aggregates: most-used templates in the team, most active members, remaining quota, AI costs.
-3. The frontend renders charts and tables.
+- Deleting a project never deletes the prompts inside it — they simply become unassigned.
 
 ---
 
@@ -1370,15 +1236,14 @@ The matrix below helps quickly trace between a Use Case, its Epic in the SRS, th
 | UC-04.04 | Epic 4 | POST /templates/{id}/favorite | favorites |
 | UC-05.01-03 | Epic 5 | POST /admin/ai-models, /admin/templates | ai_models, templates |
 | UC-06.01 | Epic 6 | POST /generated-prompts/{id}/refine | generated_prompts (ai_refined) |
-| UC-06.03 | Epic 6 | POST /playground/run | generated_prompts (playground_response) |
 | UC-07.01 | Epic 7 | POST /templates/{id}/fork | templates (forked_from_*) |
 | UC-07.02 | Epic 7 | PATCH /templates/{id} | templates, template_versions, template_variables |
 | UC-08.01 | Epic 8 | POST /votes | votes |
 | UC-08.02 | Epic 8 | POST /comments | comments |
-| UC-09.01-04 | Epic 9 | POST /workspaces, /workspace-members | workspaces, workspace_members |
-| UC-09.05 | Epic 9 | POST /subscriptions, /webhooks/stripe | subscriptions, plans |
-| UC-09.06 | Epic 9 | (internal check) | usage_quotas |
-| UC-09.07 | Epic 9 | POST /api-keys | api_keys |
+| UC-09.01 | Epic 9 | POST /projects | projects |
+| UC-09.02 | Epic 9 | POST /projects/{id}/prompts | project_prompts |
+| UC-09.03 | Epic 9 | GET /projects/{id}/prompts | project_prompts, generated_prompts |
+| UC-09.04-06 | Epic 9 | PATCH /projects/{id} | projects, project_prompts |
 
 ---
 
@@ -1393,24 +1258,19 @@ Due to the limitations of a text document, the use case diagram below is describ
 | Guest | Group 2 (Discovery — public templates only), part of Group 1 (register, log in) |
 | User (Registered) | Groups 1, 2, 3, 4, 6, 7, 8 |
 | Author | Inherits User + Group 7 (manages their own templates), receives events from Group 8 |
-| Workspace Owner | Inherits User + all of Group 9 |
-| Workspace Admin/Editor/Viewer | Group 9 (according to role permissions) |
 | Admin (System) | Group 5 (fully), moderation in Group 8 |
-| System (Automated) | UC-03.06, UC-04.01, UC-09.06, and background jobs |
-| External LLM Provider | Triggered via UC-06.01, UC-06.02, UC-06.03, UC-06.04 |
-| Stripe | Triggered via UC-09.05 (webhook) |
+| System (Automated) | UC-03.06, UC-04.01, and background jobs |
+| External LLM Provider | Triggered via UC-06.01, UC-06.02 |
 
 ### 13.2 `<<include>>` and `<<extend>>` Relationships
 
 - **UC-03.05 (Generate & Copy)** `<<include>>` UC-03.06 (Backend render) and UC-04.01 (Auto-archive history).
 - **UC-01.01 (Register)** `<<include>>` automatically creates a Personal Workspace.
 - **UC-06.01 (AI Refine)** `<<extend>>` UC-03.05 (only when the user actively clicks it).
-- **UC-06.03 (Playground)** `<<extend>>` UC-03.05.
 - **UC-07.01 (Fork)** `<<extend>>` UC-02.04 (View template detail).
-- **Every quota-consuming use case** `<<include>>` UC-09.06 (Quota enforcement) once the system is in Phase 4.
+- **UC-03.05 (Generate & Copy)** `<<extend>>` UC-09.02 (Add prompt to a Project) when generation happens inside a project.
 
 ### 13.3 Generalization
 
-- Workspace Owner, Admin, Editor, and Viewer all generalize from User.
 - Author is a specialization of User once they have published a template.
 - Guest and User share some read-only use cases (UC-02.01, UC-02.04) — using common includes.

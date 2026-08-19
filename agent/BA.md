@@ -12,8 +12,8 @@ This document serves as the Business Analyst (BA) specification for **How2Prompt
 
 - A library of high-quality prompt templates, curated by experts.
 - Dynamic forms that let users fill in information based on a template and automatically generate a complete prompt.
-- AI-powered prompt optimization, scoring, and live testing (Playground) in Phase 2.
-- A community for sharing templates, plus team workspaces for organizations in later phases.
+- AI-powered prompt optimization and scoring in Phase 2.
+- A community for sharing templates, plus Projects for grouping related prompts in later phases.
 
 ### 1.2 Persona & Access Matrix
 
@@ -34,7 +34,7 @@ This document serves as the Business Analyst (BA) specification for **How2Prompt
 | Create & Publish Official Templates | No | No | Yes |
 | View Analytics Dashboard | No | No | Yes |
 
-*Note: Additional personas (Author, Workspace Owner/Admin/Editor/Viewer) are introduced in Phase 2-4. See [srs.md §1.4](../docs/srs.md) and [use-cases.md §1.2](../docs/use-cases.md) for the full actor list.*
+*Note: An additional persona (Author) is introduced in Phase 2. See [srs.md §1.4](../docs/srs.md) and [use-cases.md §1.2](../docs/use-cases.md) for the full actor list.*
 
 ---
 
@@ -345,7 +345,7 @@ So that users don't lose their work.
 
 * **Business Rules:**
   * Records are soft-deleted (`deleted_at`), not hard-deleted.
-  * Free plan: keeps the 100 most recent history items per user. Pro: unlimited (Phase 4).
+  * Keeps the 100 most recent history items per user.
 
 #### US-4.2: View Personal Prompt History (UC-04.02) — Priority: P1
 
@@ -516,38 +516,6 @@ So that I understand its strengths and weaknesses before using it.
 * **Business Rules:**
   * A disclaimer 'AI assessment for reference only' is always displayed alongside the score.
 
-#### US-6.3: Multi-Model Translation (UC-06.04) — Priority: P2 (Medium)
-
-As a logged-in User,
-I want to convert a prompt written for one AI model into the equivalent for another model,
-So that I can reuse my prompt on a different tool without rewriting it by hand.
-
-* **Acceptance Criteria:**
-  * **Given** I have a generated prompt optimized for one model.
-  * **When** I click `[Translate to another model]` and select the target model.
-  * **Then** the LLM converts the prompt's syntax/style to the target model while preserving intent, saved as a new, separate history record.
-
-* **Business Rules:**
-  * Especially relevant for text-to-image-model conversions (e.g., Midjourney/DALL·E), which require a significant structural rewrite.
-
-#### US-6.4: Playground (UC-06.03) — Priority: P1 (High)
-
-As a logged-in User,
-I want to test my prompt live against a real AI model,
-So that I can see the actual response before using the prompt elsewhere.
-
-* **Acceptance Criteria:**
-  * **Given** I have Playground quota remaining.
-  * **When** I select a model, adjust temperature/max_tokens (within plan limits), and click `[Run]`.
-  * **Then** the backend calls the LLM Adapter, streams the response if supported, and saves the response plus `tokens_used`, `latency_ms`, `model_version`.
-
-* **Exception Scenarios:**
-  * Provider rate limit → circuit breaker opens, fallback message shown.
-  * Response exceeds `max_tokens` → truncated with a warning.
-
-* **Business Rules:**
-  * Free: 10 runs/day, 500 output tokens. Pro: 200 runs/day, 4000 output tokens. Team: unlimited per seat (Phase 4).
-
 #### US-6.5: Share a Prompt via Public Link (UC-06.05) — Priority: P2 (Medium)
 
 As a logged-in User who owns a generated prompt,
@@ -645,6 +613,103 @@ So that it can become a publicly available template after admin approval.
 
 ---
 
+### Epic 9: Prompt Projects (Phase 4)
+
+#### US-9.1: Create a Project (UC-09.01) — Priority: P1 (High)
+
+As a logged-in User,
+I want to create a Project with a name and an optional description/icon,
+So that I can group related generated prompts together.
+
+* **Acceptance Criteria:**
+  * **Given** I am on the Projects page.
+  * **When** I click `[+ New Project]` and submit a name (and optional description/icon).
+  * **Then** the backend creates a `projects` record with `owner_id = current_user`, and I am redirected to the new project's page.
+
+* **Exception Scenarios:**
+  * Duplicate name within my own projects → `409 Conflict`, "You already have a project with this name".
+
+* **Business Rules:**
+  * A user can create an unlimited number of personal projects.
+  * The project name must be unique within the user's own projects (not globally).
+
+#### US-9.2: Add a Prompt to a Project (UC-09.02) — Priority: P1 (High)
+
+As a logged-in User who owns a generated prompt and a project,
+I want to add that prompt to a project (or generate a new one directly inside a project),
+So that related prompts stay grouped together instead of scattered across my history.
+
+* **Acceptance Criteria:**
+  * **Given** I have a generated prompt not yet assigned to a project.
+  * **When** I select `[Add to project]` and pick a target project.
+  * **Then** the backend inserts a `project_prompts` record linking the prompt and the project via `POST /api/v1/projects/{id}/prompts`.
+  * **Given** I am inside a project.
+  * **When** I click `[Generate]` on a template from within the project view.
+  * **Then** `POST /api/v1/templates/{id}/generate` includes `project_id`, and the resulting prompt is linked to the project in the same call.
+
+* **Business Rules:**
+  * A prompt can belong to at most one project at a time.
+
+#### US-9.3: View Prompts within a Project (UC-09.03) — Priority: P1 (High)
+
+As a logged-in User who owns a project,
+I want to see all prompts grouped under it, filterable by template and date,
+So that I can find and reuse prompts from a specific piece of work.
+
+* **Acceptance Criteria:**
+  * **Given** I open `/projects/{id}`.
+  * **When** the page loads.
+  * **Then** the frontend calls `GET /api/v1/projects/{id}/prompts` and renders the paginated list, joined through `project_prompts`.
+  * **And** I can filter the list by template and by date range.
+
+#### US-9.4: Set Project-Level Custom Instructions (UC-09.04) — Priority: P2 (Medium)
+
+As a logged-in User who owns a project,
+I want to set custom instructions on the project,
+So that every prompt I generate inside it automatically follows the same context without retyping it each time.
+
+* **Acceptance Criteria:**
+  * **Given** I am in a project's settings.
+  * **When** I edit the custom instructions field and save.
+  * **Then** the frontend calls `PATCH /api/v1/projects/{id}` with `custom_instructions`, persisted on the `projects` record.
+  * **And** from then on, generating a prompt inside this project automatically prepends the custom instructions before backend rendering.
+
+* **Business Rules:**
+  * Custom instructions apply only to prompts generated inside the project going forward; prompts already in the project are not retroactively changed.
+
+#### US-9.5: Move or Remove a Prompt from a Project (UC-09.05) — Priority: P2 (Medium)
+
+As a logged-in User who owns a prompt and the project(s) involved,
+I want to move a prompt to a different project or remove it from its project,
+So that I can reorganize my prompts without losing them.
+
+* **Acceptance Criteria:**
+  * **Given** a prompt is currently assigned to a project.
+  * **When** I select `[Move to project]` and pick a different target.
+  * **Then** the backend updates the existing `project_prompts` row to the new `project_id` via `POST /api/v1/projects/{id}/prompts`.
+  * **Given** a prompt is currently assigned to a project.
+  * **When** I select `[Remove from project]`.
+  * **Then** the backend calls `DELETE /api/v1/projects/{id}/prompts/{promptId}`, deleting the `project_prompts` row while leaving the prompt itself intact and unassigned.
+
+#### US-9.6: Rename or Delete a Project (UC-09.06) — Priority: P2 (Medium)
+
+As a logged-in User who owns a project,
+I want to rename it or delete it,
+So that I can keep my project list accurate as my work evolves.
+
+* **Acceptance Criteria:**
+  * **Given** I am in a project's settings.
+  * **When** I edit the name and save.
+  * **Then** the backend updates `projects.name` via `PATCH /api/v1/projects/{id}`.
+  * **Given** I am in a project's settings.
+  * **When** I click `[Delete project]` and confirm.
+  * **Then** the backend calls `DELETE /api/v1/projects/{id}`, soft-deletes the `projects` record (`deleted_at`), and removes its `project_prompts` links.
+
+* **Business Rules:**
+  * Deleting a project never deletes the prompts inside it — the underlying `generated_prompts` rows are untouched and simply become unassigned.
+
+---
+
 ## 3. System Integration & Data Schemas
 
 ### 3.1 Technology Stack Summary
@@ -665,7 +730,7 @@ So that it can become a publicly available template after admin approval.
 | Access Token | JWT signed with RS256 (asymmetric), 15-minute validity, stored in memory |
 | Refresh Token | 30-day validity, stored in httpOnly cookie, rotates on each use |
 | Password Hashing | BCrypt, cost >= 12 |
-| OAuth | Google OIDC (Phase 1); GitHub, Microsoft planned for Phase 4 |
+| OAuth | Google OIDC (Phase 1); GitHub, Microsoft may be added later |
 | State Management | Zustand (frontend) — replaces React AuthContext |
 
 ### 3.3 Core Database Tables (Phase 1)
@@ -844,11 +909,15 @@ All REST APIs serialize errors in the following format:
 | US-5.6 | UC-05.06 | — (supplementary, not in base catalog) | `us-5.6-admin-mark-template-as-featured.md` |
 | US-6.1 | UC-06.01 | Epic 6, US-6.1 (Phase 2) | `us-6.1-ai-refine-a-prompt.md` |
 | US-6.2 | UC-06.02 | Epic 6, US-6.2 (Phase 2) | `us-6.2-ai-score-a-prompt.md` |
-| US-6.3 | UC-06.04 | Epic 6, US-6.3 (Phase 2) | `us-6.3-translate-a-prompt-between-models.md` |
-| US-6.4 | UC-06.03 | Epic 6, US-6.4 (Phase 2) | `us-6.4-run-a-prompt-in-the-playground.md` |
 | US-6.5 | UC-06.05 | Epic 6, US-6.5 (Phase 2) | `us-6.5-share-a-prompt-via-public-link.md` |
 | US-7.1 | UC-07.01 | Epic 7, US-7.1 (Phase 2) | `us-7.1-fork-a-template.md` |
 | US-7.2 | UC-07.02 | Epic 7, US-7.2 (Phase 2) | `us-7.2-edit-a-personal-template.md` |
 | US-7.3 | UC-07.03 | Epic 7 (Phase 2, not itemized in SRS §3 table) | `us-7.3-create-a-new-template-from-scratch.md` |
 | US-7.4 | UC-07.04 | Epic 7, US-7.3 (Phase 2) | `us-7.4-manage-template-versions.md` |
 | US-7.5 | UC-07.05 | Epic 7, US-7.4 (Phase 2) | `us-7.5-submit-a-template-for-community-review.md` |
+| US-9.1 | UC-09.01 | Epic 9, US-9.1 (Phase 4) | `us-9.1-create-a-project.md` |
+| US-9.2 | UC-09.02 | Epic 9, US-9.2 (Phase 4) | `us-9.2-add-a-prompt-to-a-project.md` |
+| US-9.3 | UC-09.03 | Epic 9, US-9.3 (Phase 4) | `us-9.3-view-prompts-within-a-project.md` |
+| US-9.4 | UC-09.04 | Epic 9, US-9.4 (Phase 4) | `us-9.4-set-project-level-custom-instructions.md` |
+| US-9.5 | UC-09.05 | Epic 9, US-9.5 (Phase 4) | `us-9.5-move-or-remove-a-prompt-from-a-project.md` |
+| US-9.6 | UC-09.06 | Epic 9, US-9.6 (Phase 4) | `us-9.6-rename-or-delete-a-project.md` |
